@@ -180,7 +180,14 @@ class TestBillingCompanyBoundary(unittest.TestCase):
                     "BP-NO-COMPANY"
                 )
 
-        sql.assert_not_called()
+        # Frappe v16 may query Translation metadata while constructing the
+        # validation error. The business invariant is that invoice-candidate
+        # SQL never runs before the effective Company check fails.
+        self.assertFalse(any(
+            "tabTimesheet Detail" in str(call.args[0])
+            for call in sql.call_args_list
+            if call.args
+        ))
         new_doc.assert_not_called()
 
     def test_generate_invoice_uses_effective_company_in_both_orders(self):

@@ -42,6 +42,7 @@ jobs:
       # installs and runs while the optional expense integration stays off.
       FRAPPE_BRANCH: version-16
       ERPNEXT_BRANCH: version-16
+      PAYMENTS_BRANCH: version-16
 
     services:
       mariadb:
@@ -121,6 +122,11 @@ jobs:
           CI: "Yes"
         run: |
           bench get-app erpnext --branch "$ERPNEXT_BRANCH" --skip-assets
+          # Frappe v16's legacy FrappeTestCase compatibility loader follows
+          # ERPNext test-record links into Payment Gateway, which moved to the
+          # optional Payments app. Keep it out of the install proof below, then
+          # install it only as test-fixture infrastructure.
+          bench get-app payments --branch "$PAYMENTS_BRANCH" --skip-assets
           bench get-app batch_projects "$GITHUB_WORKSPACE" --skip-assets
           bench new-site \
             --db-root-password "$DB_ROOT_PASSWORD" \
@@ -143,6 +149,10 @@ jobs:
           assert not frappe.db.exists("DocType", "Expense Claim Type"), "HRMS unexpectedly installed"
           assert not frappe.db.exists("Custom Field", "Expense Claim Type-custom_reinvoice_policy")
           PYEOF
+
+      - name: Install ERPNext v16 test-fixture dependency
+        working-directory: ${{ env.BENCH_PATH }}
+        run: bench --site "$SITE_NAME" install-app payments
 
       - name: Seed ERPNext test fixtures missing from a fresh site
         working-directory: ${{ env.BENCH_PATH }}
