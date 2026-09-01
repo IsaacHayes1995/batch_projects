@@ -140,14 +140,29 @@ jobs:
 
       - name: Verify ERPNext-only install and optional HRMS boundary
         working-directory: ${{ env.BENCH_PATH }}
+        # Run under the bench env directly, not `bench console`: IPython catches
+        # a failing assertion, prints it and still exits 0, so this gate has to
+        # be a plain interpreter for a failure to fail the job.
         run: |
-          bench --site "$SITE_NAME" console <<'PYEOF'
+          ./env/bin/python - <<PYEOF
           import frappe
-          from batch_projects.setup.integration_fields import has_timesheet_task_field
+
+          frappe.init(site="$SITE_NAME", sites_path="sites")
+          frappe.connect()
+
+          from batch_projects.setup.integration_fields import (
+              has_hrms_expense_integration,
+              has_timesheet_task_field,
+          )
 
           assert has_timesheet_task_field(), "core Timesheet task field was not installed"
           assert not frappe.db.exists("DocType", "Expense Claim Type"), "HRMS unexpectedly installed"
-          assert not frappe.db.exists("Custom Field", "Expense Claim Type-custom_reinvoice_policy")
+          assert not frappe.db.exists(
+              "Custom Field", "Expense Claim Type-custom_reinvoice_policy"
+          ), "HRMS custom field created without HRMS"
+          assert not has_hrms_expense_integration(), "HRMS integration reported as available"
+
+          print("ERPNext-only install verified: core fields present, HRMS boundary clean")
           PYEOF
 
       - name: Install ERPNext v16 test-fixture dependency
