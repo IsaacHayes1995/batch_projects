@@ -453,91 +453,86 @@ class TestQueryFilters(FrappeTestCase):
         self._sprint = doc.name
         return doc.name
 
-    @patch("batch_projects.api.board._check_permission")
-    @patch.object(board.frappe, "get_all")
-    def test_get_sprint_report_filters_trash(self, get_all, check_perm):
+    # Note: `board.frappe` is the shared frappe module, so patching `get_all`
+    # on it patches it process-wide. Frappe v16 caches the result of the
+    # notification lookup performed during `doc.insert()`, and a MagicMock
+    # cannot be pickled into that cache. Every patch below is therefore scoped
+    # to the call under test, with real fixtures created beforehand.
+
+    def test_get_sprint_report_filters_trash(self):
         """get_sprint_report includes is_deleted:0 in task query."""
-        get_all.return_value = []
         proj = self._make_project()
         team = self._make_team()
         sprint = self._make_sprint(proj, team)
 
-        board.get_sprint_report(proj, sprint)
-        
+        with patch("batch_projects.api.board._check_permission"), \
+                patch.object(board.frappe, "get_all", return_value=[]) as get_all:
+            board.get_sprint_report(proj, sprint)
+
         # Find the BP Task call
-        task_calls = [c for c in get_all.call_args_list 
+        task_calls = [c for c in get_all.call_args_list
                       if c.args and c.args[0] == "BP Task"]
         self.assertTrue(len(task_calls) > 0)
         filters = task_calls[0].kwargs["filters"]
         self.assertEqual(filters["is_deleted"], 0)
 
-    @patch("batch_projects.api.board._check_team_permission")
-    @patch("batch_projects.permissions.get_accessible_projects")
-    @patch.object(board.frappe, "get_all")
-    def test_get_team_velocity_filters_trash_and_accessible(self, get_all, acc_proj, check_perm):
+    def test_get_team_velocity_filters_trash_and_accessible(self):
         """get_team_velocity includes is_deleted:0 and accessible project constraint."""
-        acc_proj.return_value = None  # Admin
-        get_all.return_value = []
         team = self._make_team()
 
-        board.get_team_velocity(team, last_n_sprints=1)
-        
+        with patch("batch_projects.api.board._check_team_permission"), \
+                patch("batch_projects.permissions.get_accessible_projects", return_value=None), \
+                patch.object(board.frappe, "get_all", return_value=[]) as get_all:
+            board.get_team_velocity(team, last_n_sprints=1)
+
         # Find the BP Task call
-        task_calls = [c for c in get_all.call_args_list 
+        task_calls = [c for c in get_all.call_args_list
                       if c.args and c.args[0] == "BP Task"]
         if task_calls:
             filters = task_calls[0].kwargs["filters"]
             self.assertEqual(filters["is_deleted"], 0)
 
-    @patch("batch_projects.api.board._require_system_user")
-    @patch.object(board.frappe, "get_all")
-    def test_get_dashboard_filters_trash(self, get_all, require_sys):
+    def test_get_dashboard_filters_trash(self):
         """get_dashboard includes is_deleted:0 in personal task query."""
-        get_all.return_value = []
-        
-        board.get_dashboard()
-        
+        with patch("batch_projects.api.board._require_system_user"), \
+                patch.object(board.frappe, "get_all", return_value=[]) as get_all:
+            board.get_dashboard()
+
         # Find the BP Task call
-        task_calls = [c for c in get_all.call_args_list 
+        task_calls = [c for c in get_all.call_args_list
                       if c.args and c.args[0] == "BP Task"]
         if task_calls:
             filters = task_calls[0].kwargs["filters"]
             self.assertEqual(filters.get("is_deleted"), 0)
 
-    @patch("batch_projects.api.board._check_permission")
-    @patch.object(board.frappe, "get_all")
-    def test_get_sprint_capacity_filters_trash(self, get_all, check_perm):
+    def test_get_sprint_capacity_filters_trash(self):
         """get_sprint_capacity includes is_deleted:0."""
         proj = self._make_project()
         team = self._make_team()
         sprint = self._make_sprint(proj, team)
-        
+
         mock_sprint = MagicMock()
         mock_sprint.project = proj
         mock_sprint.sprint_name = "Sprint 1"
-        get_all.return_value = []
 
-        # Patch only the read under test. Patching board.frappe.get_doc at the
-        # decorator level also patches the shared frappe module while the real
-        # project/team/sprint fixtures above are created, leaving MagicMock
-        # names that Frappe v16's stricter query builder rejects in tearDown.
-        with patch.object(board.frappe, "get_doc", return_value=mock_sprint):
+        with patch("batch_projects.api.board._check_permission"), \
+                patch.object(board.frappe, "get_all", return_value=[]) as get_all, \
+                patch.object(board.frappe, "get_doc", return_value=mock_sprint):
             board.get_sprint_capacity(sprint)
-        
+
         # Find the BP Task call
-        task_calls = [c for c in get_all.call_args_list 
+        task_calls = [c for c in get_all.call_args_list
                       if c.args and c.args[0] == "BP Task"]
         self.assertTrue(len(task_calls) > 0)
         filters = task_calls[0].kwargs["filters"]
         self.assertEqual(filters["is_deleted"], 0)
 
-    @patch.object(project_templates.frappe, "get_all")
-    def test_snapshot_tasks_filters_trash(self, get_all):
+    def test_snapshot_tasks_filters_trash(self):
         """_snapshot_tasks includes is_deleted:0."""
-        get_all.return_value = []
         proj = self._make_project()
 
-        project_templates._snapshot_tasks(proj, "2026-09-01")
-        
+        with patch.object(project_templates.frappe, "get_all", return_value=[]) as get_all:
+            project_templates._snapshot_tasks(proj, "2026-09-01")
+
         filters = get_all.call_args.kwargs["filters"]
         self.assertEqual(filters["is_deleted"], 0)
