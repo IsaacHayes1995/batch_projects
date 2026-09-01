@@ -5,6 +5,11 @@ batch_projects.patches.normalize_project_member_roles
 batch_projects.patches.create_project_work_activity_type
 
 [post_model_sync]
+# Replaces the former all-or-nothing Custom Field fixture. Core ERPNext
+# fields are always repaired; HRMS expense fields are created only when
+# HRMS is installed. Also fixes sites where a missing HRMS DocType caused
+# Frappe to skip Timesheet Detail-custom_bp_task and broke task reads.
+batch_projects.patches.ensure_integration_custom_fields
 # migrate_custom_fields_to_library reads/writes the new BP Custom Field /
 # BP Custom Field Project tables, so it must run AFTER doctype schema sync,
 # not before. configparser (which parses this file) requires every entry to

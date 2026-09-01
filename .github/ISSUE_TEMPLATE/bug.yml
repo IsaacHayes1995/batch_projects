@@ -55,7 +55,7 @@ body:
     id: erpnext_version
     attributes:
       label: ERPNext / Frappe version
-      placeholder: e.g. ERPNext 15.x, Frappe 15.x
+      placeholder: e.g. ERPNext 16.x, Frappe 16.x
     validations:
       required: true
   - type: input

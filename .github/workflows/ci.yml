@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.14"
       - name: Compile-check every module (syntax/import errors only)
         run: python -m compileall -q batch_projects
 
@@ -38,10 +38,10 @@ jobs:
       SITE_NAME: test_site
       DB_ROOT_PASSWORD: root
       ADMIN_PASSWORD: admin
-      # Both declared frappe-dependencies in pyproject.toml are pinned to the
-      # v15 line; nothing else (hrms, payments, ...) is a dependency of this app.
-      FRAPPE_BRANCH: version-15
-      ERPNEXT_BRANCH: version-15
+      # HRMS is deliberately absent: this job proves a plain ERPNext v16 site
+      # installs and runs while the optional expense integration stays off.
+      FRAPPE_BRANCH: version-16
+      ERPNEXT_BRANCH: version-16
 
     services:
       mariadb:
@@ -73,11 +73,11 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.14"
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
 
       - name: Cache pip
         uses: actions/cache@v4
@@ -129,11 +129,20 @@ jobs:
             "$SITE_NAME"
           bench --site "$SITE_NAME" install-app erpnext
           bench --site "$SITE_NAME" install-app batch_projects
-          # Explicit migrate: loads batch_projects fixtures (Custom Fields on
-          # ERPNext doctypes, e.g. Timesheet Detail-custom_bp_task) that the
-          # suite's tests depend on. install-app runs migrate, but an explicit
-          # pass guarantees fixture sync even if the app was already installed.
+          # Explicit migrate exercises the after_migrate repair path too.
           bench --site "$SITE_NAME" migrate
+
+      - name: Verify ERPNext-only install and optional HRMS boundary
+        working-directory: ${{ env.BENCH_PATH }}
+        run: |
+          bench --site "$SITE_NAME" console <<'PYEOF'
+          import frappe
+          from batch_projects.setup.integration_fields import has_timesheet_task_field
+
+          assert has_timesheet_task_field(), "core Timesheet task field was not installed"
+          assert not frappe.db.exists("DocType", "Expense Claim Type"), "HRMS unexpectedly installed"
+          assert not frappe.db.exists("Custom Field", "Expense Claim Type-custom_reinvoice_policy")
+          PYEOF
 
       - name: Seed ERPNext test fixtures missing from a fresh site
         working-directory: ${{ env.BENCH_PATH }}
@@ -147,12 +156,6 @@ jobs:
           # "Could not find Warehouse Type: Transit" before any test runs.
           # Create it up front so the deterministic suite is actually runnable.
           bench --site "$SITE_NAME" execute frappe.client.insert --kwargs '{"doc": {"doctype": "Warehouse Type", "name": "Transit"}}' || true
-          # batch_projects/fixtures/custom_field.json is skipped wholesale when
-          # ANY entry references a doctype absent from this minimal install
-          # ("DocType Expense Claim Type not found"), which drops the
-          # Timesheet Detail-custom_bp_task field the suite depends on. Create
-          # that field explicitly so the deterministic suite is runnable.
-          bench --site "$SITE_NAME" execute frappe.client.insert --kwargs '{"doc": {"doctype": "Custom Field", "dt": "Timesheet Detail", "fieldname": "custom_bp_task", "fieldtype": "Link", "label": "BP Task", "options": "BP Task", "insert_after": "task", "module": "Batch Projects"}}' || true
           # The add_sales_invoice_timesheet_detail_index patch's DB index does
           # not survive on a fresh minimal install (the patch's Property Setter
           # + add_index path is unreliable there). Add the index directly so
@@ -179,7 +182,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
           cache: yarn
           cache-dependency-path: frontend/yarn.lock
       - name: Install

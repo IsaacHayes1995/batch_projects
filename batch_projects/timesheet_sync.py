@@ -3,7 +3,7 @@ batch_projects/timesheet_sync.py
 ─────────────────────────────────
 BP Task.actual_hours becomes a rollup instead of a dead field nobody
 writes. Source of truth: SUM of submitted Timesheet Detail rows joined via
-the custom_bp_task fixture field (fixtures/custom_field.json).
+the custom_bp_task integration field.
 
 Written with frappe.db.set_value, not doc.save() — this is a system
 recompute triggered by ERPNext's own Timesheet submit/cancel, not a user
@@ -12,11 +12,17 @@ edit, so it deliberately skips BP Task's save-side activity log / events.emit.
 
 import frappe
 
+from batch_projects.setup.integration_fields import has_timesheet_task_field
+
 
 def sync_task_actual_hours(task_name: str):
     """Recompute one BP Task's actual_hours. Safe to call for a task that
     doesn't exist or has no timesheet rows (resolves to 0)."""
-    if not task_name or not frappe.db.exists("BP Task", task_name):
+    if (
+        not task_name
+        or not has_timesheet_task_field()
+        or not frappe.db.exists("BP Task", task_name)
+    ):
         return
 
     rows = frappe.db.sql(
@@ -64,6 +70,9 @@ def reconcile_actual_hours():
     in both directions (stale non-zero with no rows left, and missing hours),
     rather than recomputing every task in the install.
     """
+    if not has_timesheet_task_field():
+        return 0
+
     rows = frappe.db.sql(
         """
         SELECT t.name AS task,
@@ -106,7 +115,7 @@ def reconcile_actual_hours():
 def task_has_timesheet_rows(task_name: str) -> bool:
     """True if any submitted Timesheet has logged time against this task —
     used by get_task to report hours_source: 'timesheet' vs 'manual'."""
-    if not task_name:
+    if not task_name or not has_timesheet_task_field():
         return False
     return bool(frappe.db.sql(
         """
@@ -123,7 +132,13 @@ def task_has_timesheet_rows(task_name: str) -> bool:
 # ─── doc_events (hooks.py) ───────────────────────────────────────────────────
 
 def _resync_tasks_on(doc):
-    tasks = {row.custom_bp_task for row in (doc.time_logs or []) if row.custom_bp_task}
+    if not has_timesheet_task_field():
+        return
+    tasks = {
+        row.get("custom_bp_task")
+        for row in (doc.time_logs or [])
+        if row.get("custom_bp_task")
+    }
     for task_name in tasks:
         sync_task_actual_hours(task_name)
 

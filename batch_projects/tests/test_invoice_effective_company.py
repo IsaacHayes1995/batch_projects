@@ -160,6 +160,7 @@ class TestInvoiceEffectiveCompany(unittest.TestCase):
             patch.object(erp_link, "_check_permission"),
             patch("batch_projects.access.require_capability"),
             patch.object(erp_link, "require_feature"),
+            patch.object(erp_link, "has_hrms_expense_integration", return_value=True),
             patch.object(
                 erp_link.frappe,
                 "get_doc",

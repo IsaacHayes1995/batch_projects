@@ -1,5 +1,7 @@
 import frappe
 
+from batch_projects.setup.integration_fields import ensure_integration_custom_fields
+
 # The Activity Type every task-timer-generated Timesheet Detail row is
 # stamped with. Named as a constant since timers.py needs the
 # exact same string.
@@ -23,11 +25,17 @@ def after_install():
             frappe.get_doc({"doctype": "Role", **role}).insert(ignore_permissions=True)
             print(f"  Created role: {role['role_name']}")
 
+    ensure_integration_custom_fields()
     ensure_timer_activity_type()
     ensure_bp_task_accounting_dimension()
 
     frappe.db.commit()
     print("batch_projects installed successfully!")
+
+
+def after_migrate():
+    """Keep ERP fields repaired and activate HRMS integration when available."""
+    ensure_integration_custom_fields()
 
 
 def ensure_bp_task_accounting_dimension():

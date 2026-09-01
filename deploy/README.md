@@ -29,7 +29,7 @@ Compatibility between them is managed as follows:
 
 | Relationship | Mechanism | How it's enforced |
 |---|---|---|
-| **BatchProjects ⨯ ERPNext/Frappe core** | A dedicated git branch per ERPNext release line — `version-15` targets ERPNext v15, with `version-16` following the same pattern once ERPNext v16 ships. | Selected at install time (`bench get-app --branch version-15`). |
+| **BatchProjects ⨯ ERPNext/Frappe core** | A dedicated git branch per ERPNext release line — `version-15` targets ERPNext v15 and `version-16` targets ERPNext v16. | Selected at install time (for example, `bench get-app --branch version-16`). |
 | **BatchProjects ⨯ Gateway** | Semantic version ranges. Each Gateway release declares the BatchProjects version range it supports; the installer detects the running BatchProjects version and automatically resolves the newest compatible Gateway release from a signed compatibility manifest. | Fully automatic, both at install time and on every subsequent Gateway restart. |
 | **Gateway ⨯ ERPNext/Frappe core** | The same branch convention as the first row, applied to the Gateway's own release channel. | Determined by which Gateway release channel is in use. |
 

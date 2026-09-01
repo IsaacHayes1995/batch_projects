@@ -12,7 +12,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg" alt="License: AGPL v3"></a>
-  <a href="https://frappeframework.com"><img src="https://img.shields.io/badge/Frappe-v15-0089FF.svg" alt="Frappe v15"></a>
+  <a href="https://frappeframework.com"><img src="https://img.shields.io/badge/Frappe-v16-0089FF.svg" alt="Frappe v16"></a>
   <a href="https://github.com/BatchNepal/batch_projects/stargazers"><img src="https://img.shields.io/github/stars/BatchNepal/batch_projects?style=flat" alt="GitHub Stars"></a>
   <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
 </p>
@@ -96,14 +96,16 @@ We believe in full transparency regarding how BatchProjects is built and license
 
 ## Quick Start (Core App)
 
-BatchProjects runs as a standard Frappe app on **Frappe v15 / ERPNext v15**.
+This branch runs as a standard Frappe app on **Frappe v16 / ERPNext v16**.
+HRMS is optional; when it is installed, BatchProjects automatically enables
+Expense Claim re-invoicing fields on the next migration.
 
 ```bash
 # Navigate to your bench directory
 cd ~/frappe-bench
 
 # Get the app
-bench get-app https://github.com/BatchNepal/batch_projects --branch version-15
+bench get-app https://github.com/IsaacHayes1995/batch_projects --branch version-16
 
 # Install on your site
 bench --site your-site.local install-app batch_projects
@@ -113,7 +115,7 @@ bench --site your-site.local migrate
 ```
 
 That's the entire community version install — no Node, no build step, no external
-service. The `version-15` branch tracks ERPNext v15; see
+service. The `version-16` branch tracks ERPNext v16; see
 [`deploy/README.md`](deploy/README.md) for the full version-compatibility
 story and how branch naming maps to ERPNext versions going forward.
 

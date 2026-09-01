@@ -7441,6 +7441,8 @@ def search_erp_documents(doctype, query, limit=10, project=None):
 
     if doctype not in _ERP_SEARCH_DOCTYPES:
         frappe.throw(f"DocType '{doctype}' is not allowed for references.")
+    if not frappe.db.exists("DocType", doctype):
+        return []
 
     from batch_projects import access
 
@@ -7531,6 +7533,8 @@ def get_erp_document_label(doctype, name):
         frappe.throw(f"DocType '{doctype}' is not allowed for references.")
     if not name:
         return {"name": name, "label": "", "doctype": doctype}
+    if not frappe.db.exists("DocType", doctype):
+        return {"name": name, "label": name, "doctype": doctype}
 
     title_field = frappe.db.get_value("DocType", doctype, "title_field") or "name"
     fields = ["name"] if title_field == "name" else ["name", title_field]
@@ -9058,5 +9062,4 @@ def get_field_value_choices(doctype, fieldname, project=None):
                            limit_page_length=_ENUM_MAX_CARDINALITY + 1, order_by=fieldname)
     values = [r[fieldname] for r in rows if r.get(fieldname)]
     return [] if len(values) > _ENUM_MAX_CARDINALITY else values
-
 

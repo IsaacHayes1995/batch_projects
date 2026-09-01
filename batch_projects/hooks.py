@@ -53,17 +53,6 @@ fixtures = [
     {"dt": "Role", "filters": [[
         "name", "in", ["BP Admin", "BP Manager", "BP Member", "BP Viewer", "BP Guest"]
     ]]},
-    # Custom fields on core ERPNext doctypes — NEVER edit erpnext JSON directly,
-    # these ship as fixtures. Filtered to exactly the fields we own.
-    {"dt": "Custom Field", "filters": [[
-        "name", "in", ["Timesheet Detail-custom_bp_task", "Sales Order-custom_bp_project",
-                       "Expense Claim Detail-custom_is_billable",
-                       "Expense Claim Detail-custom_sales_invoice",
-                       "Expense Claim Type-custom_reinvoice_policy",
-                       "Expense Claim Type-custom_markup_percent",
-                       "Lead-custom_bp_project", "Opportunity-custom_bp_project",
-                       "Quotation-custom_bp_project"]
-    ]]},
     # Client Script on Sales Order (8C) / Lead / Opportunity / Quotation —
     # the "Create Batch Project" button, one per stage of the pipeline.
     {"dt": "Client Script", "filters": [[
@@ -74,6 +63,7 @@ fixtures = [
 
 # Hooks
 after_install = "batch_projects.setup.install.after_install"
+after_migrate = "batch_projects.setup.install.after_migrate"
 
 # Runs inside frappe.auth.validate_auth() on every request. Re-scopes
 # frappe.session.user from the gateway's service account (what actually
@@ -235,7 +225,7 @@ override_doctype_class = {
 }
 
 # actual_hours rollup — resync every BP Task a submitted/cancelled
-# Timesheet's rows point at (via the custom_bp_task fixture field).
+# Timesheet's rows point at (via the custom_bp_task integration field).
 # erp.* automation triggers fire onto the same events.emit() bus every
 # task/comment/schedule trigger already rides. Tenancy-checked no-ops for
 # anything outside a BP Project.

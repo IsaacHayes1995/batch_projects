@@ -26,6 +26,7 @@ from batch_projects.billing_reservation import (
     get_live_claimed_timesheet_details,
 )
 from batch_projects.expense_reservation import guard_expense_claim_details
+from batch_projects.setup.integration_fields import has_hrms_expense_integration
 
 
 @frappe.whitelist()
@@ -2005,6 +2006,12 @@ def generate_expense_invoice(project):
     access.require_capability(project, "view_money")
     require_feature("billing_writeback")
 
+    if not has_hrms_expense_integration():
+        frappe.throw(
+            "Expense re-invoicing requires the optional HRMS app. Install HRMS "
+            "and run a site migration to enable this feature."
+        )
+
     doc = frappe.get_doc("BP Project", project)
     if not doc.erpnext_project:
         frappe.throw(f"Link '{doc.project_name}' to an ERPNext Project before invoicing it.")
@@ -2478,7 +2485,7 @@ def get_erp_doc_summary(project, doctype, name):
     require_workspace_feature("money_tab")
 
     spec = _DOC_SPECS.get(doctype)
-    if not spec:
+    if not spec or not frappe.db.exists("DocType", doctype):
         frappe.throw(_DENIED)
 
     erp_project = _erp_project_for(project)
