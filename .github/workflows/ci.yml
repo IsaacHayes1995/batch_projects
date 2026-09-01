@@ -144,10 +144,13 @@ jobs:
         # a failing assertion, prints it and still exits 0, so this gate has to
         # be a plain interpreter for a failure to fail the job.
         run: |
-          ./env/bin/python - <<PYEOF
+          # Run from sites/ exactly as bench does, so Frappe resolves the bench
+          # root (and its logs directory) the same way it does at runtime.
+          cd sites
+          ../env/bin/python - <<PYEOF
           import frappe
 
-          frappe.init(site="$SITE_NAME", sites_path="sites")
+          frappe.init(site="$SITE_NAME")
           frappe.connect()
 
           from batch_projects.setup.integration_fields import (
