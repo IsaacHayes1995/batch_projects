@@ -506,8 +506,7 @@ class TestQueryFilters(FrappeTestCase):
 
     @patch("batch_projects.api.board._check_permission")
     @patch.object(board.frappe, "get_all")
-    @patch.object(board.frappe, "get_doc")
-    def test_get_sprint_capacity_filters_trash(self, get_doc, get_all, check_perm):
+    def test_get_sprint_capacity_filters_trash(self, get_all, check_perm):
         """get_sprint_capacity includes is_deleted:0."""
         proj = self._make_project()
         team = self._make_team()
@@ -516,10 +515,14 @@ class TestQueryFilters(FrappeTestCase):
         mock_sprint = MagicMock()
         mock_sprint.project = proj
         mock_sprint.sprint_name = "Sprint 1"
-        get_doc.return_value = mock_sprint
         get_all.return_value = []
-        
-        board.get_sprint_capacity(sprint)
+
+        # Patch only the read under test. Patching board.frappe.get_doc at the
+        # decorator level also patches the shared frappe module while the real
+        # project/team/sprint fixtures above are created, leaving MagicMock
+        # names that Frappe v16's stricter query builder rejects in tearDown.
+        with patch.object(board.frappe, "get_doc", return_value=mock_sprint):
+            board.get_sprint_capacity(sprint)
         
         # Find the BP Task call
         task_calls = [c for c in get_all.call_args_list 
