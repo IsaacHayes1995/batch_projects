@@ -131,10 +131,15 @@ export default defineConfig(({ command }) => ({
         manualChunks(id) {
           if (id.includes("node_modules")) return "vendor";
         },
-        assetFileNames: (info) =>
-          info.name === "index.css"
-            ? "assets/index.css"
-            : "assets/[name]-[hash][extname]",
+        // The stylesheet is content-hashed like every other asset. It used to
+        // be pinned to a fixed "assets/index.css" while the JS entry was
+        // hashed, so a browser could hold a cached stylesheet against freshly
+        // deployed markup — and because Vue's scoped-CSS attribute (data-v-*)
+        // is recomputed whenever a component's contents change, stale CSS does
+        // not merely look dated, it stops matching at all: every scoped rule
+        // silently drops out. spa_assets.get_spa_entry() already reads the real
+        // filename out of Vite's manifest, so nothing needs a fixed name.
+        assetFileNames: "assets/[name]-[hash][extname]",
       },
     },
   },
