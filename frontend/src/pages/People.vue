@@ -271,6 +271,6 @@ function utilBarColor(pct) {
 function openFirstProject(person) {
   if (!person.projects.length) return
   const proj = person.projects[0]
-  router.push(`/workspace/${proj.key || proj.name}/list`)
+  router.push(`/projects/${proj.key || proj.name}/list`)
 }
 </script>

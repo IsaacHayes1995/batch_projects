@@ -547,7 +547,7 @@ async function openNotification(n) {
   if (n.task && project) {
     // Open the task in its project board.
     store.toggleNotifDrawer(false)
-    if (!router.currentRoute.value.path.includes(`/workspace/${project.key}`)) {
+    if (!router.currentRoute.value.path.includes(`/projects/${project.key}`)) {
       await router.push(store.projectLanding(project.key))
     }
     setTimeout(() => store.openTaskDetail(n.task), 80)

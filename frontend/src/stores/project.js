@@ -143,7 +143,7 @@ export const useProjectStore = defineStore("project", () => {
     if (view !== "summary" && view !== "files" && enabled.length && !enabled.includes(view)) {
       view = "summary";
     }
-    return `/workspace/${key}/${view}`;
+    return `/projects/${key}/${view}`;
   }
 
   // ─── Getters ──────────────────────────────────────────────────────────────
@@ -521,7 +521,7 @@ export const useProjectStore = defineStore("project", () => {
     // csrf_token is available in every API response cookie — no extra call needed.
     // In dev (Vite), neither is set — call get_session_info once.
     if (window.frappe?.session?.user && window.frappe.session.user !== "Guest") {
-      // Prod path: workspace.html already injected the session — mirror it
+      // Prod path: projects.html already injected the session — mirror it
       // into the reactive ref so the sidebar shows the real name.
       currentUser.value = {
         user: window.frappe.session.user,

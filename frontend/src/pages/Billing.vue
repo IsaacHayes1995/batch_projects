@@ -58,7 +58,7 @@
               </p>
             </div>
             <div class="ml-auto" v-if="ent.tier !== 'starter'">
-              <RouterLink to="/workspace/settings" class="text-sm" style="color: var(--accent);">Workspace settings →</RouterLink>
+              <RouterLink to="/projects/settings" class="text-sm" style="color: var(--accent);">Workspace settings →</RouterLink>
             </div>
           </div>
         </div>
@@ -414,7 +414,7 @@ function normalizePlan(p) {
       monthly: yearly,
       yearly,
     },
-    per: p.per || '/workspace / month',
+    per: p.per || '/projects / month',
     highlight: p.is_popular === true,
     limits: p.limits || p.features || [],
     seats: p.max_users,
@@ -666,7 +666,7 @@ const PlanCard = defineComponent({
       if (!p.price) return 0
       return isYearly.value ? (p.price.yearly || 0) : (p.price.monthly || 0)
     })
-    const periodSuffix = computed(() => isYearly.value ? '/workspace / year' : '/workspace / month')
+    const periodSuffix = computed(() => isYearly.value ? '/projects / year' : '/projects / month')
 
     const currency = computed(() => '$')
 

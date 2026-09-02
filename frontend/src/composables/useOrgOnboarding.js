@@ -137,7 +137,7 @@ export function useOrgOnboarding({ onComplete } = {}) {
 
       await store.fetchProjects()
       toast.success('Workspace ready', { description: `${key.trim()} · ${name.trim()}` })
-      router.push(`/workspace/${key.trim()}/board`)
+      router.push(`/projects/${key.trim()}/board`)
       onComplete?.()
     } catch (e) {
       toast.error('Setup failed', { description: String(e.message || e) })

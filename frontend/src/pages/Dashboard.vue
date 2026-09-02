@@ -105,7 +105,7 @@
                     <p class="text-sm text-muted truncate">{{ item.title }}</p>
                   </div>
                 </div>
-                <router-link to="/workspace/my-tasks" class="mt-3 block text-xs text-accent hover:underline">See all upcoming →</router-link>
+                <router-link to="/projects/my-tasks" class="mt-3 block text-xs text-accent hover:underline">See all upcoming →</router-link>
               </div>
             </div>
           </section>
@@ -140,7 +140,7 @@
                 <button type="button" class="text-xs text-accent hover:underline" @click="showInboxCount += 5">Show 5 more</button>
               </div>
               <div class="px-5 py-2.5 border-t border-separator">
-                <router-link to="/workspace/notifications" class="text-xs text-accent hover:underline">View all →</router-link>
+                <router-link to="/projects/notifications" class="text-xs text-accent hover:underline">View all →</router-link>
               </div>
             </div>
           </section>
@@ -157,7 +157,7 @@
             </div>
             <div v-if="!myIssues.length" class="flex flex-col items-center gap-1 py-10">
               <p class="text-sm text-muted">No active tasks.</p>
-              <router-link to="/workspace/my-tasks" class="text-xs text-accent hover:underline">Pick something up →</router-link>
+              <router-link to="/projects/my-tasks" class="text-xs text-accent hover:underline">Pick something up →</router-link>
             </div>
             <div v-else>
               <div v-for="group in groupedWork" :key="group.label">
@@ -179,7 +179,7 @@
               </div>
             </div>
             <div class="px-5 py-2.5 border-t border-separator">
-              <router-link to="/workspace/my-tasks" class="text-xs text-accent hover:underline">Open my tasks page →</router-link>
+              <router-link to="/projects/my-tasks" class="text-xs text-accent hover:underline">Open my tasks page →</router-link>
             </div>
           </section>
 
@@ -246,7 +246,7 @@
           <section>
             <div class="flex items-center justify-between mb-4">
               <h2 class="text-base font-semibold text-foreground">Project Health</h2>
-              <router-link to="/workspace/all" class="text-sm text-accent hover:underline">View all →</router-link>
+              <router-link to="/projects/all" class="text-sm text-accent hover:underline">View all →</router-link>
             </div>
             <div v-if="wsLoading" class="flex justify-center py-10">
               <div class="size-5 border-2 border-border border-t-blue-600 rounded-full animate-spin"></div>
@@ -254,7 +254,7 @@
             <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div v-for="proj in projectHealth" :key="proj.key"
                 class="group relative bg-overlay rounded-lg border border-border shadow-sm p-4 cursor-pointer transition-shadow hover:shadow-md flex flex-col gap-3 overflow-hidden"
-                               @click="$router.push(`/workspace/${proj.key}`)">
+                               @click="$router.push(`/projects/${proj.key}`)">
                 <div class="flex items-start justify-between gap-2">
                   <div class="flex items-center gap-2.5 min-w-0">
                     <div class="shrink-0 size-9 rounded-[10px] overflow-hidden">
@@ -325,7 +325,7 @@
                 <tbody class="divide-y divide-separator">
                   <tr v-for="row in filteredProfitability" :key="row.key"
                     class="hover:bg-surface-secondary transition-colors cursor-pointer"
-                    @click="$router.push(`/workspace/${row.key}/settings/billing`)">
+                    @click="$router.push(`/projects/${row.key}/settings/billing`)">
                     <td class="px-5 py-3.5">
                       <div class="flex items-center gap-2">
                         <span class="size-2 rounded-full shrink-0" :style="{ backgroundColor: row.color }"></span>
@@ -380,7 +380,7 @@
                     <p class="flex-1 text-sm text-muted truncate">{{ item.project }}</p>
                     <span v-if="item.hours" class="text-xs font-medium text-muted tabular-nums">{{ item.hours }}h</span>
                     <span class="text-sm font-semibold text-muted tabular-nums">{{ formatCurrency(item.amount) }}</span>
-                    <router-link :to="`/workspace/${item.key}/money`"
+                    <router-link :to="`/projects/${item.key}/money`"
                       class="px-2.5 h-6 inline-flex items-center text-xs font-semibold text-accent-soft-foreground bg-accent-soft hover:bg-accent-soft-hover rounded-md transition-colors active:scale-[0.97] whitespace-nowrap">
                       {{ item.action }}
                     </router-link>
@@ -590,7 +590,7 @@
               <div v-else class="space-y-2">
                 <div v-for="p in staleProjects" :key="p.key"
                   class="flex items-center gap-2.5 cursor-pointer hover:bg-surface-secondary px-2 py-2.5 rounded-md -mx-2 transition-colors"
-                  @click="$router.push(`/workspace/${p.key}`)">
+                  @click="$router.push(`/projects/${p.key}`)">
                   <span class="size-2.5 rounded-full shrink-0" :style="{ backgroundColor: p.color }"></span>
                   <div class="flex-1 min-w-0">
                     <p class="text-sm font-medium text-foreground truncate">{{ p.name }}</p>
@@ -745,7 +745,7 @@ onMounted(async () => {
   try {
     const homePref = await getViewPrefs(null, 'home_dashboard')
     if (homePref?.dashboard_id) {
-      await router.replace(`/workspace/reports/${homePref.dashboard_id}`)
+      await router.replace(`/projects/reports/${homePref.dashboard_id}`)
       return
     }
   } catch { /* fall through to the stock dashboard */ }
@@ -924,12 +924,12 @@ async function openInboxItem(item) {
   const project = item.project ? store.projects.find(p => p.name === item.project) : null
   if (!project) return
   if (item.task) {
-    if (!router.currentRoute.value.path.includes(`/workspace/${project.key}`)) {
-      await router.push(`/workspace/${project.key}/board`)
+    if (!router.currentRoute.value.path.includes(`/projects/${project.key}`)) {
+      await router.push(`/projects/${project.key}/board`)
     }
     setTimeout(() => store.openTaskDetail(item.task), 80)
   } else {
-    router.push(`/workspace/${project.key}/board`)
+    router.push(`/projects/${project.key}/board`)
   }
 }
 async function markInboxItemRead(item) {

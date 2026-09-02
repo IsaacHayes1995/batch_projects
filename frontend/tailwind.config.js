@@ -1,9 +1,63 @@
+/* Imported by file path, not as "frappe-ui/tailwind/colorPalette.js": the
+   package's exports map only publishes "./tailwind" (its full preset), and we
+   deliberately want the palette without the preset's global base styles. */
+import {
+  generateColorPalette,
+  generateSemanticColors,
+  generateCSSVariables,
+} from "./node_modules/frappe-ui/tailwind/colorPalette.js";
+import plugin from "tailwindcss/plugin";
+
+/* frappe-ui ships a Tailwind preset, but that preset's theme plugin also
+   rewrites global `html`/`body` typography and form styling, which would
+   override this app's own token system (tokens.css) everywhere. We only need
+   frappe-ui's *colors* so its components (sidebar, dropdowns, app switcher)
+   render correctly, so we take the palette and the CSS variables that back its
+   dark theme, and leave the global base styles alone.
+
+   The semantic scales are nested objects — `surface.white`, `ink.gray-8`,
+   `outline.gray-2` — and Tailwind deep-merges `theme.extend.colors`, so they
+   sit alongside this app's own `surface.DEFAULT`/`surface.secondary` without
+   either clobbering the other. */
+const frappeUIColors = {
+  ...generateColorPalette(),
+  ...generateSemanticColors(),
+};
+
+/* Defines --surface-*, --ink-*, --outline-* for :root and [data-theme="dark"].
+   The semantic colors carry inline light-mode fallbacks, so this is what makes
+   frappe-ui components follow the app into dark mode rather than staying light. */
+const frappeUIVariables = plugin(({ addBase }) => {
+  addBase(generateCSSVariables());
+});
+
+/* Both palettes define some of the same top-level names — `surface` most
+   importantly, where frappe-ui contributes `surface-white`/`surface-gray-*`
+   and this app contributes `surface`/`surface-secondary`. A plain spread would
+   let one object replace the other wholesale and silently break every
+   frappe-ui component, so merge one level down and let this app's own tokens
+   win on a genuine key-for-key clash. */
+function mergeColors(base, overrides) {
+  const out = { ...base };
+  for (const [name, value] of Object.entries(overrides)) {
+    const existing = base[name];
+    out[name] =
+      value && typeof value === "object" && existing && typeof existing === "object"
+        ? { ...existing, ...value }
+        : value;
+  }
+  return out;
+}
+
 /** @type {import('tailwindcss').Config} */
 
 export default {
   content: [
     "./index.html",
     "./src/**/*.{vue,js,ts,jsx,tsx}",
+    /* frappe-ui is distributed as source, so its components' utility classes
+       have to be scanned here or they generate no CSS at all. */
+    "./node_modules/frappe-ui/src/**/*.{vue,js,ts}",
   ],
   darkMode: ["class", '[data-theme="dark"]'],
   theme: {
@@ -31,8 +85,9 @@ export default {
         metric: ["1.75rem",   { lineHeight: "1" }],
       },
 
-      /* All colors reference CSS vars — OKLCH values live in tokens.css */
-      colors: {
+      /* All colors reference CSS vars — OKLCH values live in tokens.css.
+         frappeUIColors comes first so this app's own tokens win any tie. */
+      colors: mergeColors(frappeUIColors, {
         accent: {
           DEFAULT:           "var(--accent)",
           foreground:        "var(--accent-foreground)",
@@ -114,7 +169,7 @@ export default {
           50:         "var(--accent-soft)",
           100:        "var(--accent-soft)",
         },
-      },
+      }),
 
       /* Bare `border`/`border-b`/`divide-*` resolve to tokens — never gray-200 */
       borderColor: {
@@ -285,5 +340,5 @@ export default {
     },
   },
 
-  plugins: [require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate"), frappeUIVariables],
 };

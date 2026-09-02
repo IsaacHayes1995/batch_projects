@@ -666,16 +666,21 @@
   --chip-font-size:   var(--text-xs);
   --chip-font-weight: var(--font-medium);
 
-  /* Sidebar — explicit brand colors (user spec 2026-07-13), not derived from
-     the oklch scale like the rest of the app. */
-  --sidebar-bg:           #162036;
-  --sidebar-text:         #ffffff;
-  --sidebar-text-active:  #ffffff;
+  /* Sidebar — mapped onto frappe-ui's semantic surfaces so the rail matches
+     the other Frappe apps (Desk, CRM, Helpdesk) rather than carrying the old
+     standalone navy brand colour. These resolve against the frappe-ui
+     variables injected by the Tailwind plugin in tailwind.config.js, and each
+     carries a light-mode fallback so the rail still renders if that layer is
+     ever absent. Being CSS variables, they follow [data-theme="dark"]
+     automatically. */
+  --sidebar-bg:           var(--surface-menu-bar, #f4f5f6);
+  --sidebar-text:         var(--ink-gray-7, #4c5257);
+  --sidebar-text-active:  var(--ink-gray-9, #171717);
   --sidebar-item-height:  28px;
   --sidebar-item-radius:  var(--radius-sm);
   --sidebar-item-padding: 0 10px;
-  --sidebar-hover-bg:     oklch(1 0 0 / 0.06);
-  --sidebar-active-bg:    #2a3a57;
+  --sidebar-hover-bg:     var(--surface-gray-2, #f2f2f2);
+  --sidebar-active-bg:    var(--surface-selected, #e2e2e2);
 }
 
 /* ==========================================================================

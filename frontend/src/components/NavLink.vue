@@ -59,7 +59,7 @@ const route = useRoute()
 const router = useRouter()
 
 const isActive = computed(() => {
-  if (props.exact || props.to === '/workspace') return route.path === props.to
+  if (props.exact || props.to === '/projects') return route.path === props.to
   return route.path.startsWith(props.to)
 })
 </script>

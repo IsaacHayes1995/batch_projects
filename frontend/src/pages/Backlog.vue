@@ -23,7 +23,7 @@
     <template v-else>
 
       <div class="flex justify-end items-center gap-2 px-1 pb-2">
-        <router-link :to="`/workspace/${route.params.key}/sprints-overview`" class="bl-btn bl-btn--ghost">
+        <router-link :to="`/projects/${route.params.key}/sprints-overview`" class="bl-btn bl-btn--ghost">
           <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
           Sprints overview
         </router-link>
@@ -84,11 +84,11 @@
               <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v6H5a2 2 0 01-2-2v-4a2 2 0 012-2h4zm0-6v6m6-12v18m0-18h4a2 2 0 012 2v14a2 2 0 01-2 2h-4m0-18v18"/></svg>
               Capacity
             </button>
-            <router-link :to="`/workspace/${route.params.key}/sprint/${activeSprint.name}`" class="bl-btn bl-btn--sprint-detail">
+            <router-link :to="`/projects/${route.params.key}/sprint/${activeSprint.name}`" class="bl-btn bl-btn--sprint-detail">
               <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
               Sprint detail
             </router-link>
-            <router-link :to="`/workspace/${route.params.key}/board`" class="bl-btn bl-btn--board-link">
+            <router-link :to="`/projects/${route.params.key}/board`" class="bl-btn bl-btn--board-link">
               View on Board
               <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
             </router-link>
@@ -162,7 +162,7 @@
             <button class="bl-btn bl-btn--sprint-detail" title="Capacity" @click="openCapacity(sprint)">
               <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v6H5a2 2 0 01-2-2v-4a2 2 0 012-2h4zm0-6v6m6-12v18m0-18h4a2 2 0 012 2v14a2 2 0 01-2 2h-4m0-18v18"/></svg>
             </button>
-            <router-link :to="`/workspace/${route.params.key}/sprint/${sprint.name}`" class="bl-btn bl-btn--sprint-detail" title="Sprint detail">
+            <router-link :to="`/projects/${route.params.key}/sprint/${sprint.name}`" class="bl-btn bl-btn--sprint-detail" title="Sprint detail">
               <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
             </router-link>
             <button class="bl-btn bl-btn--start" :disabled="!!activeSprint" :title="activeSprint ? `Complete '${activeSprint.sprint_name}' first` : ''" @click="handleStartSprint(sprint)">Start sprint</button>

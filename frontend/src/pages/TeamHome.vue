@@ -237,8 +237,8 @@
                         style="grid-template-columns:minmax(0,1fr) auto auto auto auto"
                         tabindex="0"
                         role="button"
-                        @click="$router.push('/workspace/' + p.key + '/board')"
-                        @keydown.enter="$router.push('/workspace/' + p.key + '/board')">
+                        @click="$router.push('/projects/' + p.key + '/board')"
+                        @keydown.enter="$router.push('/projects/' + p.key + '/board')">
                         <div class="flex items-center gap-2.5 min-w-0 pr-4">
                           <ProjectAvatar :theme="p.theme" :seed="p.key" size="xs" />
                           <div class="min-w-0">
@@ -265,9 +265,9 @@
                         </div>
                         <div class="w-[104px] flex gap-1 opacity-0 group-hover:opacity-100 justify-end transition-opacity">
                           <Button size="sm" variant="bordered" class="h-6 px-2.5"
-                            @click.stop="$router.push('/workspace/' + p.key + '/board')">Board</Button>
+                            @click.stop="$router.push('/projects/' + p.key + '/board')">Board</Button>
                           <Button size="sm" variant="bordered" class="h-6 px-2.5"
-                            @click.stop="$router.push('/workspace/' + p.key + '/list')">List</Button>
+                            @click.stop="$router.push('/projects/' + p.key + '/list')">List</Button>
                         </div>
                       </div>
                     </div>
@@ -310,8 +310,8 @@
                       style="grid-template-columns:minmax(0,1fr) auto auto auto"
                       tabindex="0"
                       role="button"
-                      @click="$router.push('/workspace/' + p.key + '/board')"
-                      @keydown.enter="$router.push('/workspace/' + p.key + '/board')">
+                      @click="$router.push('/projects/' + p.key + '/board')"
+                      @keydown.enter="$router.push('/projects/' + p.key + '/board')">
                       <div class="flex items-center gap-2.5 min-w-0 pr-4">
                         <ProjectAvatar :theme="p.theme" :seed="p.key" size="xs" class="opacity-60" />
                         <div class="min-w-0">
@@ -474,7 +474,7 @@
                   <div v-if="team.parent_team_info" class="flex items-center justify-between px-4 py-2">
                     <span class="text-sm text-muted">Parent</span>
                     <span class="text-sm font-medium text-accent cursor-pointer hover:underline"
-                      @click="$router.push('/workspace/team/' + team.parent_team_info.team_key)">
+                      @click="$router.push('/projects/team/' + team.parent_team_info.team_key)">
                       {{ team.parent_team_info.team_name }}
                     </span>
                   </div>
@@ -506,7 +506,7 @@
                     <ExternalLink v-else class="w-3.5 h-3.5 text-muted shrink-0" />
                     <span v-if="link.link_type === 'Project'"
                       class="flex-1 text-xs text-accent hover:underline cursor-pointer truncate"
-                      @click="$router.push('/workspace/' + link.project + '/board')">
+                      @click="$router.push('/projects/' + link.project + '/board')">
                       {{ link.label || link.project }}
                     </span>
                     <a v-else :href="link.url" target="_blank" class="flex-1 text-xs text-accent hover:underline truncate">
@@ -556,7 +556,7 @@
                 <div class="divide-y divide-separator">
                   <div v-for="st in team.sub_teams" :key="st.name"
                     class="flex items-center gap-2.5 px-4 h-10 cursor-pointer hover:bg-surface-secondary transition-colors"
-                    @click="$router.push('/workspace/team/' + st.team_key)">
+                    @click="$router.push('/projects/team/' + st.team_key)">
                     <Users class="w-3.5 h-3.5 text-muted shrink-0" />
                     <span class="flex-1 text-sm font-medium text-muted truncate">{{ st.team_name }}</span>
                     <ChevronRight class="w-3.5 h-3.5 text-muted shrink-0" />
@@ -597,7 +597,7 @@
               <div v-for="p in team.projects" :key="p.name"
                 class="grid items-center px-5 h-12 hover:bg-surface-secondary transition-colors group cursor-pointer"
                 style="grid-template-columns: minmax(0,1fr) auto auto auto auto"
-                @click="$router.push('/workspace/' + p.key + '/board')">
+                @click="$router.push('/projects/' + p.key + '/board')">
                 <div class="flex items-center gap-2.5 min-w-0 pr-4">
                   <ProjectAvatar :theme="p.theme" :seed="p.key" size="xs" />
                   <div class="min-w-0">
@@ -615,11 +615,11 @@
                 </div>
                 <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity w-[148px] justify-end" @click.stop>
                   <Button size="sm" variant="bordered" class="h-6 px-2.5"
-                    @click="$router.push('/workspace/' + p.key + '/board')">Board</Button>
+                    @click="$router.push('/projects/' + p.key + '/board')">Board</Button>
                   <Button size="sm" variant="bordered" class="h-6 px-2.5"
-                    @click="$router.push('/workspace/' + p.key + '/list')">List</Button>
+                    @click="$router.push('/projects/' + p.key + '/list')">List</Button>
                   <Button size="sm" variant="bordered" class="h-6 px-2.5"
-                    @click="$router.push('/workspace/' + p.key + '/backlog')">Backlog</Button>
+                    @click="$router.push('/projects/' + p.key + '/backlog')">Backlog</Button>
                 </div>
                 <Button size="sm" variant="light" color="danger" :isIconOnly="true"
                   class="opacity-0 group-hover:opacity-100 w-7 h-7 mx-0.5"

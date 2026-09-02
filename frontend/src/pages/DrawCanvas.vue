@@ -6,7 +6,7 @@
       <div class="flex items-center gap-2 min-w-0 flex-1">
         <button type="button"
           class="flex items-center justify-center w-7 h-7 rounded-md text-muted hover:bg-[var(--surface-hover)] hover:text-foreground transition-colors shrink-0"
-          @click="router.push(`/workspace/${route.params.key}/draw`)" title="Back to drawings">
+          @click="router.push(`/projects/${route.params.key}/draw`)" title="Back to drawings">
           <Icon :icon="ArrowLeft" class="size-4" />
         </button>
         <Input v-if="canEdit" v-model="titleDraft" size="sm" class="max-w-[260px]" placeholder="Untitled drawing"
@@ -299,7 +299,7 @@ async function removeDrawing() {
   deleting.value = true
   try {
     await deleteDrawing(drawingId.value)
-    router.push(`/workspace/${route.params.key}/draw`)
+    router.push(`/projects/${route.params.key}/draw`)
   } catch (e) {
     console.error('deleteDrawing error', e)
   } finally {

@@ -252,7 +252,7 @@ function fmtDate(s) {
 
 function goUpgrade() {
   close()
-  router.push('/workspace/pricing')
+  router.push('/projects/pricing')
 }
 
 function close() { emit('update:modelValue', false) }

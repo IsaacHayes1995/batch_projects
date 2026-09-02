@@ -16,7 +16,7 @@
         <div>
           <div class="flex items-center gap-3 mb-1">
             <router-link
-              :to="`/workspace/${route.params.key}/backlog`"
+              :to="`/projects/${route.params.key}/backlog`"
               class="text-fg-muted hover:text-fg transition-colors"
             >
               <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
@@ -165,7 +165,7 @@
 
     <div v-else class="flex flex-col items-center justify-center py-20 gap-3">
       <p class="text-fg-muted">Sprint not found.</p>
-      <router-link :to="`/workspace/${route.params.key}/backlog`" class="text-brand-500 text-sm hover:underline">
+      <router-link :to="`/projects/${route.params.key}/backlog`" class="text-brand-500 text-sm hover:underline">
         ← Back to backlog
       </router-link>
     </div>

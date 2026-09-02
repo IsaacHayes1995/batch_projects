@@ -5,9 +5,9 @@
     <div class="flex items-center justify-between px-8 py-4 border-b border-border bg-overlay shrink-0">
       <div class="flex items-center gap-2">
         <div class="w-7 h-7 rounded-md overflow-hidden flex items-center justify-center shrink-0">
-          <img :src="'/assets/batch_projects/images/bp-logo-new.svg'" class="w-full h-full object-cover" alt="" />
+          <img :src="'/assets/batch_projects/images/projects-logo.svg'" class="w-full h-full object-cover" alt="" />
         </div>
-        <span class="text-sm font-semibold text-foreground">BatchProjects</span>
+        <span class="text-sm font-semibold text-foreground">Projects</span>
       </div>
 
       <!-- Step indicators. Bare dots told you there were four steps but never

@@ -304,7 +304,7 @@ const money   = ref(null)
 
 // projectName falls back to the raw route key (e.g. "FWD") when neither
 // store.currentProject nor store.projects is populated yet — true on a
-// direct navigation or a page refresh straight to /workspace/:key/money,
+// direct navigation or a page refresh straight to /projects/:key/money,
 // since (unlike Board) this page never itself loads the project. BP
 // Project is autonamed field:project_name, so that fallback is never a
 // valid docname and the money lookup 404s. Mirrors ProjectSettings.vue's

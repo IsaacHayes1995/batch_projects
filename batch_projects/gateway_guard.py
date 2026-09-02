@@ -48,7 +48,7 @@ once meant every same-origin call to a gateway-guarded endpoint — which is
 completely normal on a topology where Frappe's own domain isn't gateway-
 fronted, e.g. this app's own SPA loads and fires a few calls before its
 cross-origin bridge session finishes bootstrapping — silently logs the user
-out: login succeeds, /app (desk) works, but /workspace (this app's SPA)
+out: login succeeds, /app (desk) works, but /projects (this app's SPA)
 logs the user straight back out, every time.
 """
 

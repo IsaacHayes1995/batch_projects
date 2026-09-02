@@ -1,5 +1,5 @@
 app_name = "batch_projects"
-app_title = "BatchProjects"
+app_title = "Projects"
 app_publisher = "BatchNepal Consultancy"
 app_description = "Enterprise Grade Project Management for ERPNext"
 app_email = "info@batchnepal.com"
@@ -26,26 +26,31 @@ gateway_min_version = "1.0.24"
 add_to_apps_screen = [
     {
         "name": "batch_projects",
-        "logo": "/assets/batch_projects/images/bp-logo-new.svg",
-        "title": "BatchProjects",
-        "route": "/workspace",
+        "logo": "/assets/batch_projects/images/projects-logo.svg",
+        "title": "Projects",
+        "route": "/projects",
     }
 ]
 
 # app_include_js = ["/assets/batch_projects/js/batch_projects.js"]
 
-# Website route rules — catch both /workspace and /workspace/<any path>
+# Website route rules — catch both /projects and /projects/<any path>.
+# /workspace is the app's former mount point, kept so links already sent out
+# (invite/notification emails, shared URLs) keep resolving; the SPA router
+# rewrites them to /projects once it boots.
 website_route_rules = [
-    {"from_route": "/workspace", "to_route": "workspace"},
-    {"from_route": "/workspace/<path:app_path>", "to_route": "workspace"},
+    {"from_route": "/projects", "to_route": "projects"},
+    {"from_route": "/projects/<path:app_path>", "to_route": "projects"},
+    {"from_route": "/workspace", "to_route": "projects"},
+    {"from_route": "/workspace/<path:app_path>", "to_route": "projects"},
     # Public, view-only share links — served by the same SPA bundle. The SPA
     # router resolves /share/:token and renders the chrome-less read-only page.
-    {"from_route": "/share/<path:app_path>", "to_route": "workspace"},
+    {"from_route": "/share/<path:app_path>", "to_route": "projects"},
     # Public intake forms — same shape, resolved by the SPA router's
     # /intake/:token route (IntakeForm.vue). Without this entry the request
     # never leaves Frappe's website-routing layer and 404s before reaching
     # the SPA at all.
-    {"from_route": "/intake/<path:app_path>", "to_route": "workspace"},
+    {"from_route": "/intake/<path:app_path>", "to_route": "projects"},
 ]
 
 # Fixtures for export — roles must match what board.py actually uses

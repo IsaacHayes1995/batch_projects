@@ -1481,7 +1481,7 @@ function onWidgetTextChange(widgetId, text) {
   dashboardsStore.updateWidgetConfig(dashboardId.value, widgetId, { text })
 }
 
-function openWidgetPage(id) { router.push(`/workspace/dashboards/${dashboardId.value}/widget/${id}`) }
+function openWidgetPage(id) { router.push(`/projects/dashboards/${dashboardId.value}/widget/${id}`) }
 
 const rootEl = ref(null)
 
@@ -1537,7 +1537,7 @@ function present() { rootEl.value?.requestFullscreen?.().catch(() => { }) }
 function printDashboard() { window.print() }
 async function duplicate() {
   const id = await dashboardsStore.duplicateDashboard(dashboardId.value)
-  if (id) router.push(`/workspace/dashboards/${id}`)
+  if (id) router.push(`/projects/dashboards/${id}`)
 }
 function togglePin() { dashboardsStore.togglePinned(dashboardId.value) }
 
@@ -1545,14 +1545,14 @@ const deleting = ref(false)
 async function confirmDelete() {
   await dashboardsStore.deleteDashboard(dashboardId.value)
   deleting.value = false
-  router.replace('/workspace/dashboards/dashboard')
+  router.replace('/projects/dashboards/dashboard')
 }
 
 async function init() {
   initializing.value = true
   await dashboardsStore.load()
   await dashboardsStore.ensureDashboard(dashboardId.value)
-  if (!dashboard.value) { router.replace('/workspace/dashboards/dashboard'); return }
+  if (!dashboard.value) { router.replace('/projects/dashboards/dashboard'); return }
   if (!store.projects.length) { try { await store.fetchProjects() } catch { } }
   for (const w of widgets.value) {
     if (!SELF_LOADING.has(w.type)) {

@@ -327,7 +327,7 @@ async function act(action) {
     const projectKey = store.projects.find(p => p.name === props.issue.project)?.key
       || store.currentProject?.key
     const url = projectKey
-      ? `${window.location.origin}/workspace/${projectKey}/board?task=${props.issue.task_key}`
+      ? `${window.location.origin}/projects/${projectKey}/board?task=${props.issue.task_key}`
       : window.location.href
     navigator.clipboard?.writeText(url)
     toast.success('Copied task link')

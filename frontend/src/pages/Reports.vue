@@ -19,5 +19,5 @@ import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-onMounted(() => router.replace('/workspace/reports/dashboard'))
+onMounted(() => router.replace('/projects/reports/dashboard'))
 </script>

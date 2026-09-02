@@ -6,7 +6,7 @@
       <nav class="flex items-center gap-1 text-base min-w-0">
         <button type="button"
           class="flex items-center gap-1.5 text-muted hover:text-foreground transition-colors shrink-0 -ml-1.5 px-1.5 py-1 rounded-md hover:bg-[var(--surface-hover)]"
-          @click="router.push('/workspace')">
+          @click="router.push('/projects')">
           <Icon :icon="ArrowLeft" class="size-3.5" />
           Back to workspace
         </button>
@@ -73,7 +73,7 @@
                   </div>
                   <div class="flex items-center gap-3">
                     <Chip size="sm" color="accent" variant="soft">{{ ent.tierLabel }}</Chip>
-                    <RouterLink to="/workspace/pricing" class="text-sm text-primary hover:underline">
+                    <RouterLink to="/projects/pricing" class="text-sm text-primary hover:underline">
                       View plans
                     </RouterLink>
                   </div>
@@ -94,7 +94,7 @@
                     <p class="text-sm text-muted mt-0.5">Manage subscription and payment methods.</p>
                   </div>
                   <div class="flex items-center gap-3">
-                    <RouterLink to="/workspace/pricing" class="text-sm text-primary hover:underline">
+                    <RouterLink to="/projects/pricing" class="text-sm text-primary hover:underline">
                       Upgrade plan
                     </RouterLink>
                     <span class="text-sm text-muted">·</span>
@@ -392,7 +392,7 @@
                   <div class="min-w-0 flex-1">
                     <p class="text-md font-semibold text-foreground">Make it yours</p>
                     <p class="text-base text-muted mt-1 leading-relaxed">
-                      Replace the BatchProjects name, sidebar logo, and browser tab icon with your own —
+                      Replace the Projects name, sidebar logo, and browser tab icon with your own —
                       what your team and clients see stays fully white-labeled. Available on the
                       <span class="font-semibold text-foreground">{{ ent.requiredPlanFor('custom_branding') }}</span> plan and above.
                     </p>
@@ -409,8 +409,8 @@
               <div class="bp-set-card" :class="{ 'opacity-50 pointer-events-none': !ent.can('custom_branding') }">
                 <div class="py-6">
                   <p class="text-base font-medium text-foreground mb-1">Brand name</p>
-                  <p class="text-sm text-muted mb-3">Replaces "BatchProjects" in the sidebar and browser tab title.</p>
-                  <Input v-model="branding.brand_name" size="md" placeholder="BatchProjects" class="max-w-[360px]" />
+                  <p class="text-sm text-muted mb-3">Replaces "Projects" in the sidebar and browser tab title.</p>
+                  <Input v-model="branding.brand_name" size="md" placeholder="Projects" class="max-w-[360px]" />
                 </div>
 
                 <div class="py-6 border-t border-separator">
@@ -420,7 +420,7 @@
                     <div class="size-11 rounded-[10px] flex items-center justify-center overflow-hidden shrink-0"
                       :class="branding.logo_url ? '' : 'bg-accent'">
                       <img v-if="branding.logo_url" :src="branding.logo_url" class="w-full h-full object-cover" alt="Logo" />
-                      <span v-else class="text-white text-base font-black">BP</span>
+                      <span v-else class="text-white text-base font-black">P</span>
                     </div>
                     <label class="bp-upload-btn">
                       <Spinner v-if="uploadingLogo" size="sm" />
@@ -982,7 +982,7 @@ async function onUploadFavicon(e) {
 }
 
 function goUpgradeBranding() {
-  router.push('/workspace/pricing')
+  router.push('/projects/pricing')
 }
 
 // ── Timesheet tab ─────────────────────────────────────────────────────────────

@@ -358,7 +358,7 @@ const tableDashboards = computed(() => {
   return [...src].sort((a, b) => String(b.modified || '').localeCompare(String(a.modified || '')))
 })
 
-function open(id) { router.push(`/workspace/dashboards/${id}`) }
+function open(id) { router.push(`/projects/dashboards/${id}`) }
 function toggleStar(d) { store.updateDashboard(d.id, { starred: !d.starred }) }
 function togglePin(d) { store.togglePinned(d.id) }
 
@@ -412,7 +412,7 @@ async function submitForm() {
     store.updateDashboard(id, { color: formColor.value })
     if (formTemplate.value?.build) await formTemplate.value.build(id, store, scope)
     formOpen.value = false
-    router.push(`/workspace/dashboards/${id}`)
+    router.push(`/projects/dashboards/${id}`)
   } catch (e) {
     if (e instanceof UpgradeRequiredError) {
       toast.error(e.message, { action: { label: 'Upgrade', onClick: () => router.push({ name: 'Pricing' }).catch(() => { window.location.hash = '#/pricing' }) } })

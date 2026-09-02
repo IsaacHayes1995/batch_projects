@@ -23,7 +23,7 @@
         <div class="w-6 h-6 rounded-[6px] flex items-center justify-center text-white text-[9px] font-bold mr-2 overflow-hidden"
           :class="entitlements.branding.logo_url ? '' : 'bg-accent'">
           <img v-if="entitlements.branding.logo_url" :src="entitlements.branding.logo_url" class="w-full h-full object-cover" alt="" />
-          <template v-else>BP</template>
+          <template v-else>P</template>
         </div>
         <span class="text-[14px] font-semibold text-foreground flex-1">
           {{ currentPageTitle }}
@@ -37,13 +37,13 @@
       <div v-if="!isPublicRoute && entitlements.isExpired"
            class="shrink-0 bg-red-600 text-white text-[13px] font-medium text-center py-2 px-4">
         Your license has expired.
-        <a href="/workspace/pricing" class="underline font-semibold hover:text-red-100">Renew now</a>
+        <a href="/projects/pricing" class="underline font-semibold hover:text-red-100">Renew now</a>
         to restore access to paid features.
       </div>
       <div v-else-if="!isPublicRoute && entitlements.isExpiringSoon"
            class="shrink-0 bg-amber-500 text-white text-[13px] font-medium text-center py-2 px-4">
         Your license expires in {{ entitlements.daysRemaining }} day{{ entitlements.daysRemaining === 1 ? '' : 's' }}.
-        <a href="/workspace/pricing" class="underline font-semibold hover:text-amber-100">Renew now</a>
+        <a href="/projects/pricing" class="underline font-semibold hover:text-amber-100">Renew now</a>
         to avoid interruption.
       </div>
 
@@ -123,15 +123,15 @@ const isProjectRoute = computed(() =>
 
 const currentPageTitle = computed(() => {
   if (route.params.key) return route.params.key.toUpperCase()
-  const map = { '/workspace': 'Home', '/workspace/my-tasks': 'My Tasks', '/workspace/notifications': 'Inbox', '/workspace/all': 'Projects' }
-  return map[route.path] || 'BatchProjects'
+  const map = { '/projects': 'Home', '/projects/my-tasks': 'My Tasks', '/projects/notifications': 'Inbox', '/projects/all': 'Projects' }
+  return map[route.path] || 'Projects'
 })
 
 // White-label branding (Team plan+) — applies the moment entitlements load
 // or change (plan upgrade, admin edit), no reload needed.
 watch(() => entitlements.branding, (b) => {
   if (!b) return
-  document.title = b.brand_name || 'BatchProjects'
+  document.title = b.brand_name || 'Projects'
   if (b.favicon_url) {
     let link = document.querySelector('link[rel="icon"]')
     if (!link) {

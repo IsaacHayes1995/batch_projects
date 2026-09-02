@@ -118,8 +118,8 @@ async function load() {
 function goProject(res) {
   // Bare project URL → ProjectIndex resolves to the project's default view
   // (the store isn't populated yet right after accepting).
-  if (res?.project_key) router.replace(`/workspace/${res.project_key}`)
-  else router.replace('/workspace')
+  if (res?.project_key) router.replace(`/projects/${res.project_key}`)
+  else router.replace('/projects')
 }
 
 async function accept() {
@@ -142,9 +142,9 @@ async function signup() {
 }
 
 function login() {
-  const back = encodeURIComponent(`/workspace/invite/${token}`)
+  const back = encodeURIComponent(`/projects/invite/${token}`)
   window.location.href = `/login?redirect-to=${back}`
 }
 
-function goWorkspace() { router.replace('/workspace') }
+function goWorkspace() { router.replace('/projects') }
 </script>

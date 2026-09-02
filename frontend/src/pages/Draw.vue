@@ -60,7 +60,7 @@
       <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
         <RouterLink
           v-for="d in drawings" :key="d.name"
-          :to="`/workspace/${route.params.key}/draw/${d.name}`"
+          :to="`/projects/${route.params.key}/draw/${d.name}`"
           class="group bg-surface shadow-surface rounded-[10px] p-4 hover:bg-[var(--surface-hover)] transition-colors duration-150 block"
         >
           <div class="h-[72px] rounded-[6px] bg-[var(--surface-secondary)] flex items-center justify-center mb-3">
@@ -143,7 +143,7 @@ async function openNewDrawing() {
   creating.value = true
   try {
     const created = await createDrawing(project.value.name, 'Untitled drawing')
-    router.push(`/workspace/${route.params.key}/draw/${created.name}`)
+    router.push(`/projects/${route.params.key}/draw/${created.name}`)
   } catch (e) {
     console.error('createDrawing error', e)
   } finally {

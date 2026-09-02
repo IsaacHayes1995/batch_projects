@@ -250,7 +250,7 @@ export const useEntitlementsStore = defineStore("entitlements", () => {
         label: "Upgrade",
         onClick: () => {
           // Lazy-import router to avoid circular deps
-          if (!_router) _router = new URL("/workspace/pricing", window.location.origin);
+          if (!_router) _router = new URL("/projects/pricing", window.location.origin);
           window.location.href = _router.href;
         },
       },

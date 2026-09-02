@@ -14,7 +14,7 @@
       <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div>
           <div class="flex items-center gap-3 mb-1">
-            <router-link :to="`/workspace/${route.params.key}/backlog`" class="text-muted hover:text-foreground transition-colors">
+            <router-link :to="`/projects/${route.params.key}/backlog`" class="text-muted hover:text-foreground transition-colors">
               <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
             </router-link>
             <h1 class="text-xl font-semibold text-foreground">Sprints Overview</h1>
@@ -77,7 +77,7 @@
           </div>
           <router-link
             v-for="s in orderedSprints" :key="s.name"
-            :to="`/workspace/${route.params.key}/sprint/${s.name}`"
+            :to="`/projects/${route.params.key}/sprint/${s.name}`"
             class="so-row"
           >
             <span class="so-col so-col--name">

@@ -22,7 +22,7 @@
               <div class="ts-spinner-sm"/> Saving…
             </span>
           </Transition>
-          <button class="ts-close-btn" @click="$router.push(`/workspace/team/${team.team_key}/board`)">
+          <button class="ts-close-btn" @click="$router.push(`/projects/team/${team.team_key}/board`)">
             <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             Close
           </button>
@@ -363,7 +363,7 @@ async function archiveTeamConfirm() {
   try {
     await api.archiveTeam(team.value.name)
     await store.fetchTeams()
-    router.push('/workspace/teams')
+    router.push('/projects/teams')
   } catch (e) { showToast(e.message || 'Failed to archive team', 'error') }
 }
 
