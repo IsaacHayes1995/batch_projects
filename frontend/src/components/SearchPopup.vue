@@ -268,13 +268,13 @@ const commands = computed(() => {
   if (k) {
     const views = store.currentProject?.enabled_views || ['summary', 'board', 'list']
     for (const v of views) {
-      if (VIEW_LABEL[v]) cmds.push({ id:'view-'+v, label:'Go to '+VIEW_LABEL[v], kw:'view open '+v, run:() => { router.push(`/workspace/${k}/${v}`); close() } })
+      if (VIEW_LABEL[v]) cmds.push({ id:'view-'+v, label:'Go to '+VIEW_LABEL[v], kw:'view open '+v, run:() => { router.push(`/projects/${k}/${v}`); close() } })
     }
-    cmds.push({ id:'settings', label:'Project settings', kw:'config', run:() => { router.push(`/workspace/${k}/settings`); close() } })
+    cmds.push({ id:'settings', label:'Project settings', kw:'config', run:() => { router.push(`/projects/${k}/settings`); close() } })
   }
-  cmds.push({ id:'my-tasks', label:'Go to My Tasks', kw:'assigned', run:() => { router.push('/workspace/my-tasks'); close() } })
-  cmds.push({ id:'all-projects', label:'Go to All Projects', kw:'switch', run:() => { router.push('/workspace/all'); close() } })
-  cmds.push({ id:'reports', label:'Go to Reports', kw:'analytics insights', run:() => { router.push('/workspace/reports'); close() } })
+  cmds.push({ id:'my-tasks', label:'Go to My Tasks', kw:'assigned', run:() => { router.push('/projects/my-tasks'); close() } })
+  cmds.push({ id:'all-projects', label:'Go to All Projects', kw:'switch', run:() => { router.push('/projects/all'); close() } })
+  cmds.push({ id:'reports', label:'Go to Reports', kw:'analytics insights', run:() => { router.push('/projects/reports'); close() } })
   return cmds
 })
 

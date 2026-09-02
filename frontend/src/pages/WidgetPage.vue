@@ -43,7 +43,7 @@ import { Icon, EmptyState, Skeleton } from '@/ui'
 import { ArrowLeft, RefreshCw, LayoutDashboard } from 'lucide-vue-next'
 
 // "Solo page" widget view — the same widget content a dashboard tile shows,
-// but taking the whole page (Board.vue's own posture: a normal /workspace
+// but taking the whole page (Board.vue's own posture: a normal /projects
 // page, not a public/share link). View-only: editing config stays on the
 // dashboard itself, reached via DashboardView.vue's per-widget "Open as
 // page" kebab action.
@@ -121,5 +121,5 @@ async function init() {
 }
 onMounted(init)
 
-function goBack() { router.push(`/workspace/dashboards/${dashboardId.value}`) }
+function goBack() { router.push(`/projects/dashboards/${dashboardId.value}`) }
 </script>

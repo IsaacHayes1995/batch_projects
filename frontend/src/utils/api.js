@@ -88,7 +88,7 @@ const MINT_BRIDGE_TOKEN_METHOD = "batch_projects.api.session.mint_bridge_token";
 
 // Every backend method that is BOTH @frappe.whitelist(allow_guest=True) AND
 // skips gateway_guard.verify_gateway_request() — the exact set a visitor to
-// one of the three public routes (/share/:token, /workspace/invite/:token,
+// one of the three public routes (/share/:token, /projects/invite/:token,
 // /intake/:token) can legitimately call while logged out. These bypass the
 // bridge entirely and go straight to Frappe same-origin, REGARDLESS of
 // bridgeIsCrossOrigin() — the bridge/JWT dance exists to prove identity to a

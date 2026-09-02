@@ -909,7 +909,7 @@ def _has_outgoing_email() -> bool:
 def _project_url(project: str, view: str = "board") -> str:
     key = frappe.db.get_value("BP Project", project, "key") if project else None
     base = frappe.utils.get_url()
-    return f"{base}/workspace/{key}/{view}" if key else f"{base}/workspace"
+    return f"{base}/projects/{key}/{view}" if key else f"{base}/projects"
 
 
 def _task_url(project: str, task_key: str) -> str:
@@ -917,7 +917,7 @@ def _task_url(project: str, task_key: str) -> str:
     key = frappe.db.get_value("BP Project", project, "key") if project else None
     base = frappe.utils.get_url()
     if key and task_key:
-        return f"{base}/workspace/{key}/board?task={task_key}"
+        return f"{base}/projects/{key}/board?task={task_key}"
     return _project_url(project)
 
 
@@ -976,7 +976,7 @@ def _send_notification_email(
         if not _has_outgoing_email():
             return
 
-        manage_url = frappe.utils.get_url("/workspace/account")
+        manage_url = frappe.utils.get_url("/projects/account")
 
         if message_html:
             # Caller-supplied HTML (digest, weekly summary, report) — use as-is.
@@ -2003,7 +2003,7 @@ def _build_report_email_html(r):
     tp        = data.get("throughput") or []
     created   = sum(x.get("created", 0) for x in tp)
     completed = sum(x.get("completed", 0) for x in tp)
-    url       = frappe.utils.get_url(f"/workspace/reports/{r.name}")
+    url       = frappe.utils.get_url(f"/projects/reports/{r.name}")
     scope     = "All projects" if not r.project else (
         frappe.db.get_value("BP Project", r.project, "project_name") or r.project)
 
@@ -2096,7 +2096,7 @@ def _send_view_subscriptions(frequency: str):
             recipient=owner, notification_type="Summary", task=None, task_key=None,
             task_title=None, project=v.project, actor_name=None, message=summary,
             message_html=html, cta_label="Open view",
-            cta_url=f"{frappe.utils.get_url()}/workspace/{key}/list" if key else None,
+            cta_url=f"{frappe.utils.get_url()}/projects/{key}/list" if key else None,
         )
 
 

@@ -6,7 +6,7 @@
       <div class="max-w-[1980px] w-[90%] mx-auto px-8 h-16 flex items-center justify-between">
         <div class="min-w-0 flex items-center gap-2">
           <div>
-            <img src="/images/bp-logo-new.svg" class="w-8 h-8 mr-2 inline-block" />
+            <img src="/images/projects-logo.svg" class="w-8 h-8 mr-2 inline-block" />
           </div>
          <div>
            <h2 class="text-md font-bold text-foreground whitespace-nowrap leading-tight">Create New Project</h2>
@@ -477,7 +477,7 @@ function back() {
 }
 function cancel() {
   if (window.history.length > 1) router.back()
-  else router.push('/workspace')
+  else router.push('/projects')
 }
 </script>
 

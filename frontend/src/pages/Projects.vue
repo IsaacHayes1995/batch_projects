@@ -2,7 +2,7 @@
   <div class="max-w-4xl mx-auto px-6 py-8">
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-3xl font-bold text-foreground">Projects</h1>
-      <Button v-if="store.projects.length" color="primary" size="sm" @click="$router.push(`/workspace/new-project`)">
+      <Button v-if="store.projects.length" color="primary" size="sm" @click="$router.push(`/projects/new-project`)">
         New project
       </Button>
     </div>
@@ -45,7 +45,7 @@
         title="No projects yet"
         description="Create your first project to start tracking work."
       >
-        <Button color="primary" size="sm" @click="$router.push(`/workspace/new-project`)">
+        <Button color="primary" size="sm" @click="$router.push(`/projects/new-project`)">
           Create project
         </Button>
       </EmptyState>

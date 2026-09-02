@@ -5,7 +5,7 @@
 </template>
 
 <script setup>
-// Resolves /workspace/:key → the project's configured default view.
+// Resolves /projects/:key → the project's configured default view.
 // Lives as a component (not a router redirect) because the project list may
 // not be loaded yet on a cold/direct navigation, and we need to await it.
 import { onMounted } from 'vue'
@@ -29,6 +29,6 @@ onMounted(async () => {
   if (view !== 'summary' && view !== 'files' && enabled.length && !enabled.includes(view)) {
     view = 'summary'
   }
-  router.replace(`/workspace/${key}/${view}`)
+  router.replace(`/projects/${key}/${view}`)
 })
 </script>

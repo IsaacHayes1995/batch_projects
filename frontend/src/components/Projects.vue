@@ -6,7 +6,7 @@
         <h1 class="text-3xl font-bold text-foreground tracking-tight">All Projects</h1>
         <p class="text-base text-muted mt-0.5">{{ store.projects.length }} project{{ store.projects.length !== 1 ? 's' : '' }}</p>
       </div>
-      <button @click="$router.push(`/workspace/new-project`)"
+      <button @click="$router.push(`/projects/new-project`)"
         class="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white text-base font-semibold rounded-lg hover:bg-accent-hover shadow-sm shadow-accent-soft transition-[background-color]">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
         New Project
@@ -50,7 +50,7 @@
         </div>
         <h3 class="text-xl font-semibold text-foreground mb-1">No projects yet</h3>
         <p class="text-base text-muted mb-6">Create your first project to get started.</p>
-        <button @click="$router.push(`/workspace/new-project`)"
+        <button @click="$router.push(`/projects/new-project`)"
           class="flex items-center gap-2 px-5 py-2.5 bg-[var(--accent)] text-white text-base font-semibold rounded-xl hover:bg-accent-hover transition-colors">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
           Create Project

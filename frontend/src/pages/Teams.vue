@@ -144,7 +144,7 @@
               v-for="team in filteredTeams"
               :key="team.name"
               class="border-b border-separator last:border-0 hover:bg-surface-secondary transition-colors cursor-pointer group"
-              @click="$router.push('/workspace/team/' + team.team_key)"
+              @click="$router.push('/projects/team/' + team.team_key)"
             >
               <!-- Name -->
               <td class="px-5 py-3.5">
@@ -191,7 +191,7 @@
                     :key="p.name"
                     class="inline-flex h-5 items-center px-2 rounded text-xs font-medium cursor-pointer hover:opacity-80"
                     :style="{ background: `color-mix(in oklab, ${p.project_color || 'var(--accent)'} 9%, transparent)`, color: p.project_color || 'var(--accent)' }"
-                    @click.stop="$router.push('/workspace/' + p.key + '/board')"
+                    @click.stop="$router.push('/projects/' + p.key + '/board')"
                   >{{ p.project_name }}</span>
                   <span
                     v-if="(team.projects || []).length > 2"
@@ -236,11 +236,11 @@
                       data-team-ctx
                     >
                       <div class="p-1">
-                        <button class="teams-menu-item" @click.stop="$router.push('/workspace/team/' + team.team_key); closeMenu()">
+                        <button class="teams-menu-item" @click.stop="$router.push('/projects/team/' + team.team_key); closeMenu()">
                           <UsersRound :size="13" class="text-muted" />Overview
                         </button>
                         <div class="h-px bg-surface-secondary my-1 mx-1" />
-                        <button class="teams-menu-item" @click.stop="$router.push('/workspace/team/' + team.team_key + '/settings'); closeMenu()">
+                        <button class="teams-menu-item" @click.stop="$router.push('/projects/team/' + team.team_key + '/settings'); closeMenu()">
                           <Settings :size="13" class="text-muted" />Settings
                         </button>
                         <button class="teams-menu-item" @click.stop="store.togglePinnedTeam(team); closeMenu()">
@@ -264,7 +264,7 @@
           :key="team.name"
           class="bg-overlay rounded-lg border border-border overflow-hidden cursor-pointer hover:shadow-md hover:border-border-secondary transition-[border-color,box-shadow] group flex flex-col"
           style="box-shadow:0 2px 4px 0 rgba(0,0,0,0.04),0 1px 2px 0 rgba(0,0,0,0.06),0 0 1px 0 rgba(0,0,0,0.06)"
-          @click="$router.push('/workspace/team/' + team.team_key)"
+          @click="$router.push('/projects/team/' + team.team_key)"
         >
           <div class="p-4 flex-1">
             <!-- Card header -->
@@ -297,11 +297,11 @@
                     data-team-ctx
                   >
                     <div class="p-1">
-                      <button class="teams-menu-item" @click.stop="$router.push('/workspace/team/' + team.team_key); closeMenu()">
+                      <button class="teams-menu-item" @click.stop="$router.push('/projects/team/' + team.team_key); closeMenu()">
                         <UsersRound :size="13" class="text-muted" />Overview
                       </button>
                       <div class="h-px bg-surface-secondary my-1 mx-1" />
-                      <button class="teams-menu-item" @click.stop="$router.push('/workspace/team/' + team.team_key + '/settings'); closeMenu()">
+                      <button class="teams-menu-item" @click.stop="$router.push('/projects/team/' + team.team_key + '/settings'); closeMenu()">
                         <Settings :size="13" class="text-muted" />Settings
                       </button>
                       <button class="teams-menu-item" @click.stop="store.togglePinnedTeam(team); closeMenu()">
@@ -362,7 +362,7 @@
                 :key="p.name"
                 class="inline-flex h-5 items-center px-2 rounded text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity"
                 :style="{ background: `color-mix(in oklab, ${p.project_color || 'var(--accent)'} 9%, transparent)`, color: p.project_color || 'var(--accent)' }"
-                @click.stop="$router.push('/workspace/' + p.key + '/board')"
+                @click.stop="$router.push('/projects/' + p.key + '/board')"
               >{{ p.project_name }}</span>
               <span
                 v-if="(team.projects || []).length > 3"
@@ -459,7 +459,7 @@ async function load() {
 async function onCreated(team) {
   showCreate.value = false
   await load()
-  router.push('/workspace/team/' + team.team_key + '/settings')
+  router.push('/projects/team/' + team.team_key + '/settings')
 }
 
 onMounted(load)

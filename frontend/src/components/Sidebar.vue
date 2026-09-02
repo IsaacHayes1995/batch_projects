@@ -1,699 +1,314 @@
 <template>
   <div class="contents">
     <!-- ══════════════════════ DESKTOP SIDEBAR ══════════════════════ -->
-    <aside
-      class="hidden lg:flex flex-col shrink-0 h-full bg-[var(--sidebar-bg)] select-none z-10 border-r border-white/[0.07] overflow-hidden relative"
-      :class="resizing ? '' : 'transition-[width] duration-200 ease-in-out'"
-      :style="{ width: collapsed ? '52px' : sidebarWidth + 'px' }"
+    <!-- ══════════════════════ DESKTOP SIDEBAR ══════════════════════ -->
+    <!-- frappe-ui's own Sidebar component, so this rail is the same one Desk,
+         CRM and Helpdesk use: identical header dropdown, section headings,
+         row styling and collapse behaviour.
+
+         Rows that carry app-specific affordances — project drag-to-reorder and
+         its per-row menu, pinned teams, the Inbox unread badge, the search
+         trigger — are rendered through the component's #sidebar-item slot
+         instead of its default row, so adopting the shared shell doesn't cost
+         any of them. Everything else falls through to frappe-ui's own
+         SidebarItem. -->
+    <FrappeSidebar
+      v-model:collapsed="collapsed"
+      :header="sidebarHeader"
+      :sections="sections"
+      class="hidden lg:flex"
     >
-      <!-- Resize handle — drag to resize, min/max clamped, persisted to localStorage. -->
-      <div
-        v-if="!collapsed"
-        class="absolute top-0 right-0 h-full w-1 cursor-col-resize z-20 hover:bg-white/[0.12] active:bg-white/20 transition-colors"
-        :class="resizing ? 'bg-white/20' : ''"
-        @mousedown="startResize"
-      />
-      <!-- ── Workspace header ──────────────────────────────────────── -->
-      <div
-        class="shrink-0 flex items-center h-[52px]"
-        :class="collapsed ? 'justify-center' : 'px-3 gap-1'"
-      > 
-        <template v-if="!collapsed">
-          <button
-            class="flex-1 flex items-center gap-2 min-w-0 px-2 h-8 rounded-md hover:bg-white/[0.07] transition-colors text-left"
-            @click="wsMenuOpen = !wsMenuOpen"
-          >
-            <div
-              class="w-5 h-5 rounded-[4px] flex items-center justify-center shrink-0 overflow-hidden"
-            >
-              <img :src="entitlements.branding.logo_url || '/assets/batch_projects/images/bp-logo-new.svg'" class="w-full h-full object-cover" alt="" />
-            </div>
-            <span
-              class="flex-1 text-base font-semibold text-[var(--sidebar-text-active)] truncate"
-              >{{ workspaceName }}</span
-            >
-            <ChevronsUpDown
-              :size="12"
-              :stroke-width="2"
-              class="text-[var(--sidebar-text)] shrink-0"
-            />
-          </button>
-          <button
-            class="sb-hdr-btn"
-            @click="store.showCreateTask = true"
-            title="New task (C)"
-          >
-            <PenLine :size="14" :stroke-width="1.5" />
-          </button>
-          <button
-            class="sb-hdr-btn"
-            @click="collapsed = true"
-            title="Collapse sidebar"
-          >
-            <PanelLeftClose :size="14" :stroke-width="1.5" />
-          </button>
-        </template>
-        <template v-else>
-          <button
-            class="sb-col-btn"
-            @click="collapsed = false"
-            title="Expand sidebar"
-          >
-            <PanelLeftOpen :size="14" :stroke-width="1.5" />
-          </button>
-        </template>
-      </div>
-
-      <!-- ── Search trigger ───────────────────────────────────────── -->
-      <div v-if="!collapsed" class="px-3 pb-6">
+      <template #sidebar-item="{ item, isCollapsed }">
+        <!-- Search -->
         <button
+          v-if="item.kind === 'search'"
+          class="w-full flex items-center gap-2 h-8 px-2 rounded hover:bg-surface-gray-2 transition-colors"
+          :title="isCollapsed ? 'Search' : ''"
           @click="$emit('search')"
-          class="w-full flex items-center gap-2 h-[30px] px-2.5 rounded-sm bg-white/[0.07] hover:bg-white/[0.1] transition-colors"
         >
-          <Search
-            :size="13"
-            :stroke-width="1.75"
-            class="text-[var(--sidebar-text)] shrink-0"
-          />
-          <span class="flex-1 text-sm text-[var(--sidebar-text)] text-left"
-            >Search or jump to…</span
-          >
-          <kbd
-            class="text-xs font-semibold text-[var(--sidebar-text)] bg-white/[0.1] border border-white/[0.12] rounded px-1 py-px leading-none shrink-0"
-            >⌘K</kbd
-          >
-        </button>
-      </div>
-      <!-- ── Nav ──────────────────────────────────────────────────── -->
-      <nav
-        class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden sb-scroll"
-        :class="collapsed ? 'px-1.5 pt-1 pb-3' : 'px-2 pb-6'"
-      >
-        <!-- ── Collapsed ──────────────────────────────────────────── -->
-        <template v-if="collapsed">
-          <div class="flex flex-col items-center gap-px">
-            <button
-              class="sb-col-btn"
-              @click="$emit('search')"
-              title="Search (⌘K)"
+          <Search :size="16" :stroke-width="1.75" class="text-ink-gray-6 shrink-0" />
+          <template v-if="!isCollapsed">
+            <span class="flex-1 text-sm text-ink-gray-6 text-left">Search or jump to…</span>
+            <kbd
+              class="text-xs font-medium text-ink-gray-5 bg-surface-gray-2 border border-outline-gray-2 rounded px-1 py-px leading-none shrink-0"
+              >⌘K</kbd
             >
-              <Search :size="16" :stroke-width="1.5" />
-            </button>
-            <button
-              class="sb-col-btn"
-              :class="exactActive('/workspace') && 'sb-col-active'"
-              @click="go('/workspace')"
-              title="Home"
-            >
-              <House :size="16" :stroke-width="1.5" />
-            </button>
-            <button
-              class="sb-col-btn"
-              :class="exactActive('/workspace/my-tasks') && 'sb-col-active'"
-              @click="go('/workspace/my-tasks')"
-              title="My Tasks"
-            >
-              <CircleCheckBig :size="16" :stroke-width="1.5" />
-            </button>
-            <button
-              class="sb-col-btn relative"
-              :class="
-                exactActive('/workspace/notifications') && 'sb-col-active'
-              "
-              @click="store.toggleNotifDrawer(true)"
-              title="Inbox"
-            >
-              <Inbox :size="16" :stroke-width="1.5" />
-              <span
-                v-if="unreadCount > 0"
-                class="absolute top-1.5 right-1.5 w-[5px] h-[5px] rounded-full bg-[var(--accent)]"
-              />
-            </button>
-            <button
-              v-if="entitlements.canWorkspace('timesheets')"
-              class="sb-col-btn"
-              :class="exactActive('/workspace/timesheets') && 'sb-col-active'"
-              @click="go('/workspace/timesheets')"
-              title="Timesheets"
-            >
-              <Timer :size="16" :stroke-width="1.5" />
-            </button>
-            <div class="w-6 h-px bg-[var(--sidebar-hover-bg)] my-2" />
-            <button
-              v-for="p in visibleProjects"
-              :key="p.name"
-              class="w-8 h-8 rounded-[7px] overflow-hidden mb-1 transition-[opacity,box-shadow] hover:opacity-90"
-              :class="isProjectActive(p.key) ? 'ring-2 ring-white/70 ring-offset-2 ring-offset-[var(--sidebar-bg)]' : 'opacity-90'"
-              :title="p.project_name || p.name"
-              @click="go(store.projectLanding(p))"
-            >
-              <ProjectAvatar :theme="p.theme" :seed="p.key" size="md" />
-            </button>
-          </div>
-        </template>
-
-        <!-- ── Expanded ───────────────────────────────────────────── -->
-        <template v-else>
-          
-          <!-- ── FAVORITES ──────────────────────────────────────── -->
-          <div class="px-2 mt-5 mb-1.5" v-if="favoriteProjects.length > 0">
-            <span
-              class="text-xs font-semibold uppercase tracking-widest text-[var(--sidebar-text)]"
-              >Favorites</span
-            >
-          </div>
-          <div
-            v-for="p in favoriteProjects"
-            :key="'fav-'+p.name"
-            class="relative group/pr mb-px"
-          >
-            <button
-              class="w-full flex items-center gap-2 h-[33px] px-2.5 rounded-md text-left transition-colors"
-              :class="
-                isProjectActive(p.key)
-                  ? 'bg-[var(--sidebar-active-bg)] text-white'
-                  : 'text-[var(--sidebar-text)] hover:bg-white/[0.07] hover:text-white'
-              "
-              @click="go(store.projectLanding(p))"
-            >
-              <ProjectAvatar :theme="p.theme" :seed="p.key" size="xs" />
-              <span class="flex-1 text-base font-medium truncate">{{
-                p.project_name || p.name
-              }}</span>
-
-              <span
-                role="button"
-                tabindex="0"
-                class="w-5 h-5 flex items-center justify-center rounded text-warning opacity-0 group-hover/pr:opacity-100 hover:bg-white/[0.12] transition-[background-color,opacity] cursor-pointer"
-                @click.stop="store.toggleFavorite(p.name)"
-                @keydown.enter.stop.prevent="store.toggleFavorite(p.name)"
-                title="Unpin"
-              >
-                <PinOff :size="12" :stroke-width="2" />
-              </span>
-            </button>
-          </div>
-
-          <!-- Personal section -->
-          <NavItem
-            :active="exactActive('/workspace')"
-            @click="go('/workspace')"
-          >
-            <template #icon><House :size="15" :stroke-width="1.5" /></template>
-            Home
-          </NavItem>
-          <NavItem
-            :active="exactActive('/workspace/my-tasks')"
-            @click="go('/workspace/my-tasks')"
-          >
-            <template #icon
-              ><CircleCheckBig :size="15" :stroke-width="1.5"
-            /></template>
-            <span class="flex-1">My Tasks</span>
-          </NavItem>
-          <NavItem
-            :active="store.showNotifDrawer"
-            @click="store.toggleNotifDrawer(true)"
-          >
-            <template #icon>
-              <div class="relative">
-                <Inbox :size="15" :stroke-width="1.5" />
-                <span
-                  v-if="unreadCount > 0"
-                  class="absolute -top-px -right-px w-[5px] h-[5px] rounded-full bg-[var(--accent)]"
-                />
-              </div>
-            </template>
-            <span class="flex-1">Inbox</span>
-            <span v-if="unreadCount > 0" class="sb-badge">{{
-              unreadCount
-            }}</span>
-          </NavItem>
-          <NavItem
-            v-if="entitlements.canWorkspace('timesheets')"
-            :active="exactActive('/workspace/timesheets')"
-            @click="go('/workspace/timesheets')"
-          >
-            <template #icon><Timer :size="15" :stroke-width="1.5" /></template>
-            Timesheets
-          </NavItem>
-
-          <!-- "More" — overflow menu for less-frequently-used surfaces
-               (a short always-visible set, with the rest tucked
-               behind one "More" popover instead of a long flat list). -->
-          <div class="relative">
-            <NavItem :active="moreMenuActive" data-more-menu @click="moreMenuOpen = !moreMenuOpen">
-              <template #icon><MoreHorizontal :size="15" :stroke-width="1.5" /></template>
-              More
-            </NavItem>
-            <Transition name="sb-dd">
-              <div v-if="moreMenuOpen" class="absolute left-0 top-[calc(100%+4px)] w-48 z-[60] sb-pop sb-pop--down" data-more-menu>
-                <div class="p-1">
-                  <!-- Dashboards is gated on the "dashboards" feature itself
-                       (the paid differentiator), not a workspace on/off
-                       toggle like Reports — hidden entirely below tier. -->
-                  <button v-if="entitlements.can('dashboards')" class="sb-menu-item" @click="moreMenuOpen = false; go('/workspace/dashboards/dashboard')">
-                    <LayoutDashboard :size="13" :stroke-width="1.5" class="text-muted" />
-                    Dashboards
-                  </button>
-                  <button class="sb-menu-item" @click="moreMenuOpen = false; go('/workspace/triage')">
-                    <ListTodo :size="13" :stroke-width="1.5" class="text-muted" />
-                    Triage
-                  </button>
-                </div>
-              </div>
-            </Transition>
-          </div>
-
-          <!-- Pinned dashboards — land at the top level like a starred
-               project/report would, not nested under a "Dashboards"
-               section (the hub for ALL dashboards, pinned or not, already
-               lives in the More popover above as "Dashboards" — no need
-               for a second, redundant entry point here). -->
-          <template v-if="entitlements.can('dashboards')">
-            <button
-              v-for="d in pinnedDashboards"
-              :key="'dash-' + d.id"
-              class="group/dash relative w-full flex items-center gap-2.5 rounded-md cursor-pointer transition-colors h-[31px] pl-2.5 pr-2 mb-px text-left text-[var(--sidebar-text)] hover:bg-white/[0.06] hover:text-white"
-              :class="route.path === `/workspace/dashboards/${d.id}` ? 'bg-[var(--sidebar-active-bg)] text-white' : ''"
-              @click="go(`/workspace/dashboards/${d.id}`)"
-            >
-              <span class="shrink-0 size-[18px] rounded-[5px] grid place-items-center"
-                :style="{ background: `color-mix(in oklab, ${d.color || 'var(--accent)'} 20%, transparent)`, color: d.color || 'var(--accent)' }">
-                <component :is="iconFor(d.icon)" :size="11" :stroke-width="2" />
-              </span>
-              <span class="flex-1 text-base truncate">{{ d.name }}</span>
-              <span
-                role="button"
-                tabindex="0"
-                class="w-5 h-5 flex items-center justify-center rounded text-[var(--sidebar-text)] opacity-0 group-hover/dash:opacity-100 hover:bg-white/[0.12] hover:text-white transition-[background-color,color,opacity] cursor-pointer shrink-0"
-                title="Unpin from sidebar"
-                @click.stop="dashboardsStore.togglePinned(d.id)"
-                @keydown.enter.stop.prevent="dashboardsStore.togglePinned(d.id)"
-              >
-                <PinOff :size="11" :stroke-width="2" />
-              </span>
-            </button>
           </template>
+        </button>
 
-          <!-- ── PROJECTS ───────────────────────────────────────── -->
-          <div class="flex items-center px-2 mt-5 mb-1.5">
-            <span
-              class="flex-1 text-xs font-semibold uppercase tracking-widest text-[var(--sidebar-text)]"
-              >Projects</span
-            >
-            <button
-              class="w-5 h-5 flex items-center justify-center rounded text-[var(--sidebar-text)] hover:text-[var(--sidebar-text)] hover:bg-white/[0.07] transition-colors"
-              @click="$router.push(`/workspace/new-project`)"
-              title="New project"
-            >
-              <Plus :size="13" :stroke-width="2" />
-            </button>
-          </div>
-
-          <div
-            v-for="(p, idx) in visibleProjects"
-            :key="p.name"
-            class="relative group/pr mb-px sb-proj-row"
-            :class="[
-              dragIndex === idx ? 'opacity-40' : '',
-              dragOverIndex === idx ? 'sb-drop-target' : '',
-            ]"
-            data-proj-menu
-            draggable="true"
-            @dragstart="onProjDragStart(idx, $event)"
-            @dragenter.prevent="onProjDragEnter(idx)"
-            @dragover.prevent
-            @drop="onProjDrop(idx)"
-            @dragend="onProjDragEnd"
+        <!-- Project row: drag-to-reorder plus a hover menu -->
+        <div
+          v-else-if="item.kind === 'project'"
+          class="relative group/pr sb-proj-row"
+          :class="[
+            dragIndex === item.index ? 'opacity-40' : '',
+            dragOverIndex === item.index ? 'sb-drop-target' : '',
+          ]"
+          data-proj-menu
+          draggable="true"
+          @dragstart="onProjDragStart(item.index, $event)"
+          @dragenter.prevent="onProjDragEnter(item.index)"
+          @dragover.prevent
+          @drop="onProjDrop(item.index)"
+          @dragend="onProjDragEnd"
+        >
+          <button
+            class="w-full flex items-center gap-2 h-8 px-2 rounded text-left transition-colors"
+            :class="
+              item.isActive
+                ? 'bg-surface-selected shadow-sm text-ink-gray-8'
+                : 'text-ink-gray-7 hover:bg-surface-gray-2'
+            "
+            :title="isCollapsed ? item.label : ''"
+            @click="go(store.projectLanding(item.project))"
           >
-            <button
-              class="w-full flex items-center gap-2 h-[33px] px-2.5 rounded-md text-left transition-colors"
-              :class="
-                isProjectActive(p.key)
-                  ? 'bg-[var(--sidebar-active-bg)] text-white'
-                  : 'text-[var(--sidebar-text)] hover:bg-white/[0.07] hover:text-white'
-              "
-              @click="go(store.projectLanding(p))"
-            >
-              <ProjectAvatar :theme="p.theme" :seed="p.key" size="xs" />
-              <span class="flex-1 text-base font-medium truncate">{{
-                p.project_name || p.name
-              }}</span>
-              <!-- spacer so name doesn't slide under the 3-dot -->
+            <ProjectAvatar :theme="item.project.theme" :seed="item.project.key" size="xs" />
+            <template v-if="!isCollapsed">
+              <span class="flex-1 text-sm truncate">{{ item.label }}</span>
+              <!-- spacer so the name never slides under the hover menu -->
               <span class="w-4 shrink-0" />
-            </button>
+            </template>
+          </button>
 
-            <!-- 3-dot menu button — hover-reveal -->
-            <button
-              class="absolute right-1.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded text-[var(--sidebar-text)] opacity-0 group-hover/pr:opacity-100 hover:bg-white/[0.12] hover:text-white transition-[background-color,color,opacity] duration-100"
-              :class="projectMenuOpen === p.name ? '!opacity-100 bg-white/[0.12] text-white' : ''"
-              @click.stop="toggleProjectMenu(p.name)"
+          <button
+            v-if="!isCollapsed"
+            class="absolute right-1.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded text-ink-gray-6 opacity-0 group-hover/pr:opacity-100 hover:bg-surface-gray-4 hover:text-ink-gray-8 transition-[background-color,color,opacity] duration-100"
+            :class="projectMenuOpen === item.project.name ? '!opacity-100 bg-surface-gray-3 text-ink-gray-8' : ''"
+            data-proj-menu
+            @click.stop="toggleProjectMenu(item.project.name)"
+          >
+            <MoreHorizontal :size="13" :stroke-width="2" />
+          </button>
+
+          <Transition name="sb-dd">
+            <div
+              v-if="projectMenuOpen === item.project.name"
+              class="absolute right-0 top-[calc(100%+6px)] w-52 z-[60] sb-pop sb-pop--down"
               data-proj-menu
             >
-              <MoreHorizontal :size="13" :stroke-width="2" />
-            </button>
-
-            <!-- Dropdown -->
-            <Transition name="sb-dd">
-              <div
-                v-if="projectMenuOpen === p.name"
-                class="absolute right-0 top-[calc(100%+6px)] w-52 z-[60] sb-pop sb-pop--down"
-                data-proj-menu
-              >
-                <div class="p-1">
-                  <button class="sb-menu-item" @click.stop="goProject(p, 'board')">
-                    <Kanban :size="13" :stroke-width="1.5" class="text-muted" />
-                    Open Board
-                  </button>
-                  <button class="sb-menu-item" @click.stop="goProject(p, 'settings')">
-                    <Settings :size="13" :stroke-width="1.5" class="text-muted" />
-                    Settings
-                  </button>
-                  <button class="sb-menu-item" @click.stop="store.toggleFavorite(p.name); projectMenuOpen = null;">
-                    <component :is="p.is_favorite ? PinOff : Pin" :size="13" :stroke-width="1.5" class="text-muted" />
-                    {{ p.is_favorite ? 'Unpin Project' : 'Pin Project' }}
-                  </button>
-                  <div class="h-px bg-separator mx-1 my-1" />
-                  <button class="sb-menu-item" @click.stop="copyProjectLink(p)">
-                    <Link2 :size="13" :stroke-width="1.5" class="text-muted" />
-                    Copy link
-                  </button>
-                  <button class="sb-menu-item" @click.stop="openProjectNewTab(p)">
-                    <ExternalLink :size="13" :stroke-width="1.5" class="text-muted" />
-                    Open in new tab
-                  </button>
-                </div>
+              <div class="p-1">
+                <button class="sb-menu-item" @click.stop="goProject(item.project, 'board')">
+                  <Kanban :size="13" :stroke-width="1.5" class="text-muted" />
+                  Open Board
+                </button>
+                <button class="sb-menu-item" @click.stop="goProject(item.project, 'settings')">
+                  <Settings :size="13" :stroke-width="1.5" class="text-muted" />
+                  Settings
+                </button>
+                <button
+                  class="sb-menu-item"
+                  @click.stop="store.toggleFavorite(item.project.name); projectMenuOpen = null;"
+                >
+                  <component
+                    :is="item.project.is_favorite ? PinOff : Pin"
+                    :size="13"
+                    :stroke-width="1.5"
+                    class="text-muted"
+                  />
+                  {{ item.project.is_favorite ? 'Unpin Project' : 'Pin Project' }}
+                </button>
+                <div class="h-px bg-separator mx-1 my-1" />
+                <button class="sb-menu-item" @click.stop="copyProjectLink(item.project)">
+                  <Link2 :size="13" :stroke-width="1.5" class="text-muted" />
+                  Copy link
+                </button>
+                <button class="sb-menu-item" @click.stop="openProjectNewTab(item.project)">
+                  <ExternalLink :size="13" :stroke-width="1.5" class="text-muted" />
+                  Open in new tab
+                </button>
               </div>
-            </Transition>
-          </div>
+            </div>
+          </Transition>
+        </div>
 
-          <button
-            v-if="store.projects.length > MAX_VISIBLE"
-            class="w-full flex items-center gap-1.5 h-7 px-2.5 text-sm text-[var(--sidebar-text)] hover:text-[var(--sidebar-text)] transition-colors"
-            @click="showAll = !showAll"
-          >
-            <component
-              :is="showAll ? ChevronUp : ChevronDown"
-              :size="11"
-              :stroke-width="2"
-              class="shrink-0"
-            />
-            {{ showAll ? 'Show less' : `Show all (${store.projects.length})` }}
-          </button>
-
-          <button
-            v-if="!store.projects.length"
-            class="w-full flex items-center gap-2 h-[33px] px-2.5 text-base text-[var(--sidebar-text)] hover:text-[var(--sidebar-text)] hover:bg-white/[0.06] rounded-md transition-colors"
-            @click="$router.push(`/workspace/new-project`)"
-          >
-            <Plus :size="14" :stroke-width="1.5" />
-            Create first project
-          </button>
-
-
-          <!-- ── REPORTS (hidden when a workspace admin switched it off) ── -->
-          <template v-if="entitlements.canWorkspace('reports')">
-          <div class="px-2 mt-5 mb-1.5">
-            <span
-              class="text-xs font-semibold uppercase tracking-widest text-[var(--sidebar-text)]"
-              >Reports</span
-            >
-          </div>
-          <NavItem
-            :active="reportsActive"
-            @click="go('/workspace/reports/dashboard')"
-          >
-            <template #icon
-              ><FileBarChart2 :size="15" :stroke-width="1.5"
-            /></template>
-            Report Builder
-          </NavItem>
-
-          <!-- Pinned (featured) reports -->
-          <button
-            v-for="r in pinnedReports"
-            :key="'rpt-' + r.id"
-            class="group/rpt relative w-full flex items-center gap-2.5 rounded-md cursor-pointer transition-colors h-[31px] pl-2.5 pr-2 mb-px text-left text-[var(--sidebar-text)] hover:bg-white/[0.06] hover:text-white"
-            :class="route.path === `/workspace/reports/${r.id}` ? 'bg-[var(--sidebar-active-bg)] text-white' : ''"
-            @click="go(`/workspace/reports/${r.id}`)"
-          >
-            <span class="shrink-0 size-[18px] rounded-[5px] grid place-items-center"
-              :style="{ background: `color-mix(in oklab, ${r.color || 'var(--accent)'} 20%, transparent)`, color: r.color || 'var(--accent)' }">
-              <component :is="iconFor(r.icon)" :size="11" :stroke-width="2" />
-            </span>
-            <span class="flex-1 text-base truncate">{{ r.name }}</span>
+        <!-- Favorite project row — same target, no reordering or menu -->
+        <button
+          v-else-if="item.kind === 'favorite'"
+          class="w-full flex items-center gap-2 h-8 px-2 rounded text-left transition-colors group/fav"
+          :class="
+            item.isActive
+              ? 'bg-surface-selected shadow-sm text-ink-gray-8'
+              : 'text-ink-gray-7 hover:bg-surface-gray-2'
+          "
+          :title="isCollapsed ? item.label : ''"
+          @click="go(store.projectLanding(item.project))"
+        >
+          <ProjectAvatar :theme="item.project.theme" :seed="item.project.key" size="xs" />
+          <template v-if="!isCollapsed">
+            <span class="flex-1 text-sm truncate">{{ item.label }}</span>
             <span
               role="button"
               tabindex="0"
-              class="w-5 h-5 flex items-center justify-center rounded text-[var(--sidebar-text)] opacity-0 group-hover/rpt:opacity-100 hover:bg-white/[0.12] hover:text-white transition-[background-color,color,opacity] cursor-pointer shrink-0"
-              title="Unpin from sidebar"
-              @click.stop="reportsStore.togglePinned(r.id)"
-              @keydown.enter.stop.prevent="reportsStore.togglePinned(r.id)"
+              class="w-5 h-5 flex items-center justify-center rounded text-warning opacity-0 group-hover/fav:opacity-100 hover:bg-surface-gray-4 transition-[background-color,opacity] cursor-pointer"
+              title="Unpin"
+              @click.stop="store.toggleFavorite(item.project.name)"
+              @keydown.enter.stop.prevent="store.toggleFavorite(item.project.name)"
             >
-              <PinOff :size="11" :stroke-width="2" />
+              <PinOff :size="12" :stroke-width="2" />
             </span>
-          </button>
           </template>
+        </button>
 
-          <!-- ── INSIGHTS ───────────────────────────────────────── -->
-          <div class="px-2 mt-5 mb-1.5">
+        <!-- Pinned team row: hover menu, same shape as a project row -->
+        <div v-else-if="item.kind === 'team'" class="relative group/tm" data-team-menu>
+          <button
+            class="w-full flex items-center gap-2 h-8 px-2 rounded text-left transition-colors"
+            :class="
+              item.isActive
+                ? 'bg-surface-selected shadow-sm text-ink-gray-8'
+                : 'text-ink-gray-7 hover:bg-surface-gray-2'
+            "
+            :title="isCollapsed ? item.label : ''"
+            @click="go('/projects/team/' + item.team.team_key)"
+          >
             <span
-              class="text-xs font-semibold uppercase tracking-widest text-[var(--sidebar-text)]"
-              >Insights</span
+              class="w-5 h-5 rounded-[4px] flex items-center justify-center text-micro font-bold shrink-0 text-white"
+              :style="{ background: item.team.team_color || 'var(--accent)' }"
+              >{{ (item.team.team_name || '?').slice(0, 2).toUpperCase() }}</span
             >
-          </div>
-          <NavItem
-            :active="exactActive('/workspace/goals')"
-            @click="go('/workspace/goals')"
-          >
-            <template #icon
-              ><Target :size="15" :stroke-width="1.5"
-            /></template>
-            Goals
-          </NavItem>
-          <NavItem
-            :active="exactActive('/workspace/portfolio')"
-            @click="go('/workspace/portfolio')"
-          >
-            <template #icon
-              ><Briefcase :size="15" :stroke-width="1.5"
-            /></template>
-            Portfolio
-          </NavItem>
-          <NavItem
-            :active="exactActive('/workspace/projects/tree')"
-            @click="go('/workspace/projects/tree')"
-          >
-            <template #icon><FolderTree :size="15" :stroke-width="1.5" /></template>
-            Project Tree
-          </NavItem>
-          <NavItem
-            :active="exactActive('/workspace/workload')"
-            @click="go('/workspace/workload')"
-          >
-            <template #icon
-              ><BarChart3 :size="15" :stroke-width="1.5"
-            /></template>
-            Workload
-          </NavItem>
-          <!-- Capability off = hide outright (cross-project surface,
-               so gated by the pre-resolved view_money_anywhere, not a
-               per-project lookup). -->
-          <NavItem
-            v-if="entitlements.viewMoneyAnywhere"
-            :active="exactActive('/workspace/margin')"
-            @click="go('/workspace/margin')"
-          >
-            <template #icon
-              ><TrendingUp :size="15" :stroke-width="1.5"
-            /></template>
-            Margin Report
-          </NavItem>
-          <NavItem
-            v-if="entitlements.viewMoneyAnywhere"
-            :active="exactActive('/workspace/batch-invoicing')"
-            @click="go('/workspace/batch-invoicing')"
-          >
-            <template #icon
-              ><ReceiptText :size="15" :stroke-width="1.5"
-            /></template>
-            Batch Invoicing
-          </NavItem>
-          <NavItem
-            :active="exactActive('/workspace/utilization')"
-            @click="go('/workspace/utilization')"
-          >
-            <template #icon
-              ><PieChart :size="15" :stroke-width="1.5"
-            /></template>
-            Utilization
-          </NavItem>
-
-          <!-- ── TEAM ───────────────────────────────────────────── -->
-          <div class="px-2 mt-5 mb-1.5">
-            <span
-              class="text-xs font-semibold uppercase tracking-widest text-[var(--sidebar-text)]"
-              >Team</span
-            >
-          </div>
-          <NavItem
-            :active="exactActive('/workspace/people')"
-            @click="go('/workspace/people')"
-          >
-            <template #icon
-              ><UsersRound :size="15" :stroke-width="1.5"
-            /></template>
-            People
-          </NavItem>
-          <NavItem
-            :active="exactActive('/workspace/teams')"
-            @click="go('/workspace/teams')"
-          >
-            <template #icon
-              ><Building2 :size="15" :stroke-width="1.5"
-            /></template>
-            Teams
-          </NavItem>
-
-          <!-- Pinned teams -->
-          <div
-            v-for="t in store.pinnedTeams"
-            :key="t.team_key"
-            class="relative group/tm mb-px"
-            data-team-menu
-          >
-            <button
-              class="w-full flex items-center gap-2 h-[33px] px-2.5 rounded-md text-left transition-colors"
-              :class="route.path.startsWith('/workspace/team/' + t.team_key)
-                ? 'bg-[var(--sidebar-active-bg)] text-white font-semibold'
-                : 'text-[var(--sidebar-text)] font-medium hover:bg-white/[0.06] hover:text-white'"
-              @click="go('/workspace/team/' + t.team_key)"
-            >
-              <span
-                class="w-5 h-5 rounded-[4px] flex items-center justify-center text-micro font-bold shrink-0"
-                :style="{ background: t.team_color || 'var(--accent)' }"
-              >{{ (t.team_name || '?').slice(0, 2).toUpperCase() }}</span>
-              <span class="flex-1 text-base truncate">{{ t.team_name }}</span>
+            <template v-if="!isCollapsed">
+              <span class="flex-1 text-sm truncate">{{ item.label }}</span>
               <span class="w-4 shrink-0" />
-            </button>
+            </template>
+          </button>
 
-            <!-- 3-dot trigger -->
-            <button
-              class="absolute right-1.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded text-[var(--sidebar-text)] opacity-0 group-hover/tm:opacity-100 hover:bg-white/[0.12] hover:text-white transition-[background-color,color,opacity] duration-100"
-              :class="teamMenuOpen === t.team_key ? '!opacity-100 bg-white/[0.12] text-white' : ''"
+          <button
+            v-if="!isCollapsed"
+            class="absolute right-1.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded text-ink-gray-6 opacity-0 group-hover/tm:opacity-100 hover:bg-surface-gray-4 hover:text-ink-gray-8 transition-[background-color,color,opacity] duration-100"
+            :class="teamMenuOpen === item.team.team_key ? '!opacity-100 bg-surface-gray-3 text-ink-gray-8' : ''"
+            data-team-menu
+            @click.stop="toggleTeamMenu(item.team.team_key)"
+          >
+            <MoreHorizontal :size="13" :stroke-width="2" />
+          </button>
+
+          <Transition name="sb-dd">
+            <div
+              v-if="teamMenuOpen === item.team.team_key"
+              class="absolute right-0 top-[calc(100%+6px)] w-52 z-[60] sb-pop sb-pop--down"
               data-team-menu
-              @click.stop="toggleTeamMenu(t.team_key)"
             >
-              <MoreHorizontal :size="13" :stroke-width="2" />
-            </button>
-
-            <!-- Dropdown -->
-            <Transition name="sb-dd">
-              <div
-                v-if="teamMenuOpen === t.team_key"
-                class="absolute right-0 top-[calc(100%+6px)] w-52 z-[60] sb-pop sb-pop--down"
-                data-team-menu
-              >
-                <div class="p-1">
-                  <button class="sb-menu-item" @click.stop="goTeam(t.team_key, '')">
-                    <UsersRound :size="13" :stroke-width="1.5" class="text-muted" />
-                    Overview
-                  </button>
-                  <div class="h-px bg-separator mx-1 my-1" />
-                  <button class="sb-menu-item" @click.stop="goTeam(t.team_key, 'settings')">
-                    <Settings :size="13" :stroke-width="1.5" class="text-muted" />
-                    Settings
-                  </button>
-                  <button class="sb-menu-item text-muted" @click.stop="store.togglePinnedTeam(t); teamMenuOpen = null">
-                    <PinOff :size="13" :stroke-width="1.5" class="text-muted" />
-                    Unpin
-                  </button>
-                </div>
+              <div class="p-1">
+                <button class="sb-menu-item" @click.stop="goTeam(item.team.team_key, '')">
+                  <UsersRound :size="13" :stroke-width="1.5" class="text-muted" />
+                  Overview
+                </button>
+                <div class="h-px bg-separator mx-1 my-1" />
+                <button class="sb-menu-item" @click.stop="goTeam(item.team.team_key, 'settings')">
+                  <Settings :size="13" :stroke-width="1.5" class="text-muted" />
+                  Settings
+                </button>
+                <button
+                  class="sb-menu-item text-muted"
+                  @click.stop="store.togglePinnedTeam(item.team); teamMenuOpen = null"
+                >
+                  <PinOff :size="13" :stroke-width="1.5" class="text-muted" />
+                  Unpin
+                </button>
               </div>
-            </Transition>
-          </div>
-        </template>
-      </nav>
+            </div>
+          </Transition>
+        </div>
 
-      <!-- ── Footer ────────────────────────────────────────────────── -->
-      <div class="shrink-0">
-        <!-- User -->
+        <!-- "More" — overflow menu for less-frequently-used surfaces, kept as a
+             popover rather than a nested submenu so every entry stays one click
+             away. -->
+        <div v-else-if="item.kind === 'more'" class="relative">
+          <SidebarItem
+            :label="item.label"
+            :icon="item.icon"
+            :isActive="moreMenuActive"
+            :isCollapsed="isCollapsed"
+            data-more-menu
+            @click="moreMenuOpen = !moreMenuOpen"
+          />
+          <Transition name="sb-dd">
+            <div
+              v-if="moreMenuOpen"
+              class="absolute left-0 top-[calc(100%+4px)] w-48 z-[60] sb-pop sb-pop--down"
+              data-more-menu
+            >
+              <div class="p-1">
+                <button
+                  v-if="entitlements.can('dashboards')"
+                  class="sb-menu-item"
+                  @click="moreMenuOpen = false; go('/projects/dashboards/dashboard')"
+                >
+                  <LayoutDashboard :size="14" :stroke-width="1.5" class="text-muted" />
+                  Dashboards
+                </button>
+                <button class="sb-menu-item" @click="go('/projects/triage'); moreMenuOpen = false">
+                  <Inbox :size="14" :stroke-width="1.5" class="text-muted" />
+                  Triage
+                </button>
+              </div>
+            </div>
+          </Transition>
+        </div>
+
+        <!-- Everything else is a plain frappe-ui row; `suffix` carries the
+             Inbox unread count. -->
+        <SidebarItem
+          v-else
+          :label="item.label"
+          :icon="item.icon"
+          :isActive="item.isActive"
+          :isCollapsed="isCollapsed"
+          @click="item.onClick?.()"
+        >
+          <template v-if="item.badge" #suffix>
+            <span class="sb-badge">{{ item.badge }}</span>
+          </template>
+        </SidebarItem>
+      </template>
+
+      <!-- Account block, pinned under the nav above frappe-ui's collapse row. -->
+      <template #footer-items="{ isCollapsed }">
         <div class="relative" ref="userMenuRef">
           <button
-            class="w-full flex items-center gap-2.5 hover:bg-white/[0.06] transition-colors"
-            :class="collapsed ? 'justify-center p-3' : 'px-3 py-2.5'"
+            class="w-full flex items-center gap-2 rounded px-2 py-1.5 hover:bg-surface-gray-2 transition-colors"
+            :class="isCollapsed ? 'justify-center' : ''"
+            :title="isCollapsed ? userName : ''"
             @click="userMenuOpen = !userMenuOpen"
-            :title="collapsed ? userName : ''"
           >
             <div class="sb-avatar shrink-0">{{ userInitials }}</div>
-            <template v-if="!collapsed">
+            <template v-if="!isCollapsed">
               <div class="flex-1 min-w-0 text-left">
-                <p
-                  class="text-base font-semibold text-[var(--sidebar-text-active)] truncate leading-none"
-                >
+                <p class="text-sm font-medium text-ink-gray-8 truncate leading-none">
                   {{ userName }}
                 </p>
-                <p
-                  class="text-xs text-[var(--sidebar-text)] truncate mt-0.5 leading-none"
-                >
+                <p class="text-xs text-ink-gray-5 truncate mt-1 leading-none">
                   {{ userEmail }}
                 </p>
               </div>
-              <ChevronsUpDown
-                :size="12"
-                :stroke-width="2"
-                class="text-[var(--sidebar-text)] shrink-0"
-              />
+              <ChevronsUpDown :size="12" :stroke-width="2" class="text-ink-gray-6 shrink-0" />
             </template>
           </button>
 
           <Transition name="sb-dd">
             <div
               v-if="userMenuOpen"
-              class="absolute bottom-full left-2 right-2 mb-2 z-50 sb-pop sb-pop--up"
+              class="absolute bottom-full left-0 right-0 mb-2 z-50 sb-pop sb-pop--up"
             >
               <div class="px-3 py-2.5 border-b border-separator">
-                <p class="text-sm font-semibold text-foreground truncate">
-                  {{ userName }}
-                </p>
-                <p class="text-xs text-muted truncate mt-0.5">
-                  {{ userEmail }}
-                </p>
+                <p class="text-sm font-semibold text-foreground truncate">{{ userName }}</p>
+                <p class="text-xs text-muted truncate mt-0.5">{{ userEmail }}</p>
               </div>
               <div class="p-1">
                 <button
                   v-if="entitlements.isWorkspaceAdmin"
                   class="sb-menu-item"
-                  @click="go('/workspace/settings'); userMenuOpen = false"
+                  @click="go('/projects/settings'); userMenuOpen = false"
                 >
-                  <SlidersHorizontal
-                    :size="14"
-                    :stroke-width="1.5"
-                    class="text-muted"
-                  />
+                  <SlidersHorizontal :size="14" :stroke-width="1.5" class="text-muted" />
                   Workspace settings
                 </button>
-                <button
-                  class="sb-menu-item"
-                  @click="go('/workspace/account'); userMenuOpen = false"
-                >
-                  <Settings
-                    :size="14"
-                    :stroke-width="1.5"
-                    class="text-muted"
-                  />
+                <button class="sb-menu-item" @click="go('/projects/account'); userMenuOpen = false">
+                  <Settings :size="14" :stroke-width="1.5" class="text-muted" />
                   Account settings
                 </button>
-                <button
-                  class="sb-menu-item"
-                  @click="go('/workspace/pricing'); userMenuOpen = false"
-                >
-                  <CreditCard
-                    :size="14"
-                    :stroke-width="1.5"
-                    class="text-muted"
-                  />
+                <button class="sb-menu-item" @click="go('/projects/pricing'); userMenuOpen = false">
+                  <CreditCard :size="14" :stroke-width="1.5" class="text-muted" />
                   Billing &amp; plan
                 </button>
                 <div class="h-px bg-separator mx-1 my-1" />
@@ -705,8 +320,8 @@
             </div>
           </Transition>
         </div>
-      </div>
-    </aside>
+      </template>
+    </FrappeSidebar>
 
     <!-- ══════════════════════ MOBILE BOTTOM NAV ══════════════════════ -->
     <nav
@@ -715,8 +330,8 @@
     >
       <div class="flex items-center justify-around px-1 py-1">
         <MobileTab
-          :active="exactActive('/workspace')"
-          @click="go('/workspace')"
+          :active="exactActive('/projects')"
+          @click="go('/projects')"
         >
           <House :size="20" :stroke-width="1.5" />
           <span>Home</span>
@@ -725,8 +340,8 @@
           :active="$route.path.includes('/board')"
           @click="
             currentProjectKey
-              ? go(`/workspace/${currentProjectKey}/board`)
-              : go('/workspace')
+              ? go(`/projects/${currentProjectKey}/board`)
+              : go('/projects')
           "
         >
           <Kanban :size="20" :stroke-width="1.5" />
@@ -734,7 +349,7 @@
         </MobileTab>
         <button
           @click="store.showCreateTask = true"
-          class="flex items-center justify-center -mt-5 rounded-full text-white active:scale-95 transition-transform"
+          class="flex items-center justify-center -mt-5 rounded-full text-ink-gray-9 active:scale-95 transition-transform"
           style="
             width: 48px;
             height: 48px;
@@ -745,8 +360,8 @@
           <Plus :size="20" :stroke-width="2.5" />
         </button>
         <MobileTab
-          :active="exactActive('/workspace/my-tasks')"
-          @click="go('/workspace/my-tasks')"
+          :active="exactActive('/projects/my-tasks')"
+          @click="go('/projects/my-tasks')"
         >
           <CircleCheckBig :size="20" :stroke-width="1.5" />
           <span>Tasks</span>
@@ -784,7 +399,7 @@
             <div
               class="w-7 h-7 rounded-[6px] flex items-center justify-center mr-2.5 overflow-hidden shrink-0"
             >
-              <img :src="entitlements.branding.logo_url || '/assets/batch_projects/images/bp-logo-new.svg'" class="w-full h-full object-cover" alt="" />
+              <img :src="entitlements.branding.logo_url || '/assets/batch_projects/images/projects-logo.svg'" class="w-full h-full object-cover" alt="" />
             </div>
             <span class="text-base font-semibold text-foreground">{{
               workspaceName
@@ -801,7 +416,7 @@
               v-for="p in store.projects"
               :key="'m-' + p.name"
               class="flex items-center gap-3 px-2.5 py-2.5 rounded-md cursor-pointer hover:bg-surface-secondary transition-colors"
-              @click="go('/workspace/' + p.key + '/board'); mobileDrawerOpen = false"
+              @click="go('/projects/' + p.key + '/board'); mobileDrawerOpen = false"
             >
               <ProjectAvatar :theme="p.theme" :seed="p.key" size="md" class="shrink-0" />
               <div class="flex-1 min-w-0">
@@ -892,6 +507,11 @@ import {
   CreditCard,
 } from '@/icons/untitledui'
 import { ProjectAvatar } from '@/ui'
+import { Sidebar as FrappeSidebar, SidebarItem } from 'frappe-ui'
+import { useFrappeApps } from '@/composables/useFrappeApps'
+
+// Default mark and product name, overridden by white-label branding.
+const PROJECTS_LOGO = '/assets/batch_projects/images/projects-logo.svg'
 
 const store = useProjectStore()
 const reportsStore = useReportsStore()
@@ -911,7 +531,7 @@ function iconFor(name) { return reportIcon(name) }
 // one entry is ever active).
 const reportsActive = computed(() => {
   const p = route.path
-  if (!p.startsWith('/workspace/reports')) return false
+  if (!p.startsWith('/projects/reports')) return false
   const id = route.params.reportId
   if (id && pinnedReports.value.some(r => r.id === id)) return false
   return true
@@ -933,57 +553,18 @@ const reportsActive = computed(() => {
 // confirmed NOT one of the pinned rows already claiming it.
 const dashboardsActive = computed(() => {
   const p = route.path
-  if (!p.startsWith('/workspace/dashboards')) return false
+  if (!p.startsWith('/projects/dashboards')) return false
   const id = route.params.dashboardId
   if (id && pinnedDashboards.value.some(d => d.id === id)) return false
   return true
 })
-const triageActive = computed(() => exactActive('/workspace/triage'))
+const triageActive = computed(() => exactActive('/projects/triage'))
 const moreMenuActive = computed(() => dashboardsActive.value || triageActive.value)
 
 // ── State ─────────────────────────────────────────────────────────────
 const collapsed = ref(false)
 
-// ── Resizable width (drag handle at the right edge, persisted) ─────────
-const SIDEBAR_WIDTH_KEY = 'bp_sidebar_width'
-const SIDEBAR_MIN = 220
-const SIDEBAR_MAX = 420
-const sidebarWidth = ref((() => {
-  const saved = Number(localStorage.getItem(SIDEBAR_WIDTH_KEY))
-  return saved >= SIDEBAR_MIN && saved <= SIDEBAR_MAX ? saved : 280
-})())
-const resizing = ref(false)
-
-function startResize(e) {
-  e.preventDefault()
-  resizing.value = true
-  const startX = e.clientX
-  const startW = sidebarWidth.value
-  // html{zoom} density scaling means on-screen pixels moved by the pointer
-  // don't map 1:1 to CSS width units — measure the actual rendered rect
-  // against the CSS width we set it to, and divide pointer deltas by that
-  // ratio (see memory: bp-ui-zoom-pointer-trap; same fix as Gantt's drag math).
-  const asideEl = e.currentTarget.closest('aside')
-  const scale = asideEl ? asideEl.getBoundingClientRect().width / startW : 1
-  function onMove(ev) {
-    const next = startW + (ev.clientX - startX) / scale
-    sidebarWidth.value = Math.min(SIDEBAR_MAX, Math.max(SIDEBAR_MIN, next))
-  }
-  function onUp() {
-    resizing.value = false
-    localStorage.setItem(SIDEBAR_WIDTH_KEY, String(sidebarWidth.value))
-    document.removeEventListener('mousemove', onMove)
-    document.removeEventListener('mouseup', onUp)
-    document.body.style.cursor = ''
-    document.body.style.userSelect = ''
-  }
-  document.addEventListener('mousemove', onMove)
-  document.addEventListener('mouseup', onUp)
-  document.body.style.cursor = 'col-resize'
-  document.body.style.userSelect = 'none'
-}
 const mobileDrawerOpen = ref(false)
-const wsMenuOpen = ref(false)
 const userMenuOpen = ref(false)
 const userMenuRef = ref(null)
 const showAll = ref(false)
@@ -996,6 +577,218 @@ const MAX_VISIBLE = 6
 defineEmits(['search'])
 defineExpose({ collapsed })
 
+const brandName = computed(() => entitlements.branding.brand_name || 'Projects')
+// The organisation, shown above the app name in the header — the Desk shows
+// the company over "ERPNext" the same way. Deliberately skips the
+// white-label brand name, which is the *app* name and is the subtitle.
+const orgName = computed(() => {
+  const site = window.frappe?.sitename || window.frappe_sitename || ''
+  const label = site.split('.')[0]
+  return label ? label.charAt(0).toUpperCase() + label.slice(1) : 'Workspace'
+})
+
+// ── Frappe app switcher / header menu ─────────────────────────────────
+// Mirrors the Desk header: the workspace name over the app name, opening a
+// menu that jumps to the other Frappe apps on this site, the Desk, the
+// website, and this app's own settings. `frappe` itself never appears in
+// get_apps()'s payload, which is why Desk is a hand-written entry.
+const { apps: frappeApps } = useFrappeApps({ exclude: ['batch_projects'] })
+
+function appIconFor(logo) {
+  return () =>
+    h('img', {
+      src: logo || PROJECTS_LOGO,
+      class: 'size-4 rounded',
+      alt: '',
+    })
+}
+
+const sidebarHeader = computed(() => ({
+  title: orgName.value,
+  subtitle: brandName.value,
+  logo: entitlements.branding.logo_url || PROJECTS_LOGO,
+  menuItems: [
+    ...(frappeApps.value.length
+      ? [
+          {
+            group: 'Apps',
+            items: frappeApps.value.map((app) => ({
+              label: app.title || app.name,
+              icon: appIconFor(app.logo),
+              onClick: () => {
+                window.location.href = app.route || `/${app.name}`
+              },
+            })),
+          },
+        ]
+      : []),
+    {
+      group: 'Frappe',
+      hideLabel: true,
+      items: [
+        { label: 'Desk', icon: 'grid', onClick: () => { window.location.href = '/app' } },
+        { label: 'Website', icon: 'globe', onClick: () => { window.location.href = '/' } },
+      ],
+    },
+    {
+      group: 'This app',
+      hideLabel: true,
+      items: [
+        ...(entitlements.isWorkspaceAdmin
+          ? [{ label: 'Workspace settings', icon: 'sliders', onClick: () => go('/projects/settings') }]
+          : []),
+        { label: 'Account settings', icon: 'settings', onClick: () => go('/projects/account') },
+        { label: 'Reload', icon: 'refresh-cw', onClick: () => window.location.reload() },
+      ],
+    },
+    {
+      group: 'Session',
+      hideLabel: true,
+      items: [{ label: 'Log out', icon: 'log-out', onClick: () => logout() }],
+    },
+  ],
+}))
+
+// ── Nav model ─────────────────────────────────────────────────────────
+// frappe-ui's Sidebar renders from a sections/items model rather than markup.
+// `kind` selects which renderer the #sidebar-item slot uses; anything without
+// one falls through to frappe-ui's own SidebarItem.
+const sections = computed(() => {
+  const out = []
+
+  const personal = [
+    { key: 'search', kind: 'search', label: 'Search' },
+    { key: 'home', label: 'Home', icon: House, isActive: exactActive('/projects'), onClick: () => go('/projects') },
+    {
+      key: 'my-tasks',
+      label: 'My Tasks',
+      icon: CircleCheckBig,
+      isActive: exactActive('/projects/my-tasks'),
+      onClick: () => go('/projects/my-tasks'),
+    },
+    {
+      key: 'inbox',
+      label: 'Inbox',
+      icon: Inbox,
+      isActive: store.showNotifDrawer,
+      badge: unreadCount.value || null,
+      onClick: () => store.toggleNotifDrawer(true),
+    },
+  ]
+  if (entitlements.canWorkspace('timesheets')) {
+    personal.push({
+      key: 'timesheets',
+      label: 'Timesheets',
+      icon: Timer,
+      isActive: exactActive('/projects/timesheets'),
+      onClick: () => go('/projects/timesheets'),
+    })
+  }
+  personal.push({ key: 'more', kind: 'more', label: 'More', icon: MoreHorizontal })
+  out.push({ label: '', items: personal })
+
+  if (favoriteProjects.value.length) {
+    out.push({
+      label: 'Favorites',
+      items: favoriteProjects.value.map((p) => ({
+        key: `fav-${p.name}`,
+        kind: 'favorite',
+        label: p.project_name || p.name,
+        project: p,
+        isActive: isProjectActive(p.key),
+      })),
+    })
+  }
+
+  const projectItems = visibleProjects.value.map((p, index) => ({
+    key: p.name,
+    kind: 'project',
+    label: p.project_name || p.name,
+    project: p,
+    index,
+    isActive: isProjectActive(p.key),
+  }))
+  if (store.projects.length > MAX_VISIBLE) {
+    projectItems.push({
+      key: 'show-all',
+      label: showAll.value ? 'Show less' : `Show all (${store.projects.length})`,
+      icon: showAll.value ? ChevronUp : ChevronDown,
+      onClick: () => { showAll.value = !showAll.value },
+    })
+  }
+  projectItems.push({
+    key: 'new-project',
+    label: store.projects.length ? 'New project' : 'Create first project',
+    icon: Plus,
+    onClick: () => go('/projects/new-project'),
+  })
+  out.push({ label: 'Projects', items: projectItems, collapsible: true })
+
+  if (entitlements.can('dashboards') && pinnedDashboards.value.length) {
+    out.push({
+      label: 'Dashboards',
+      collapsible: true,
+      items: pinnedDashboards.value.map((d) => ({
+        key: `dash-${d.id}`,
+        label: d.title || d.name,
+        icon: LayoutDashboard,
+        isActive: route.path === `/projects/dashboards/${d.id}`,
+        onClick: () => go(`/projects/dashboards/${d.id}`),
+      })),
+    })
+  }
+
+  if (entitlements.canWorkspace('reports')) {
+    const reports = [
+      {
+        key: 'report-builder',
+        label: 'Report Builder',
+        icon: FileBarChart2,
+        isActive: reportsActive.value,
+        onClick: () => go('/projects/reports/dashboard'),
+      },
+      ...pinnedReports.value.map((r) => ({
+        key: `report-${r.id}`,
+        label: r.title || r.name,
+        icon: iconFor(r.icon),
+        isActive: route.params.reportId === r.id,
+        onClick: () => go(`/projects/reports/${r.id}`),
+      })),
+    ]
+    out.push({ label: 'Reports', items: reports, collapsible: true })
+  }
+
+  const insights = [
+    { key: 'goals', label: 'Goals', icon: Target, isActive: exactActive('/projects/goals'), onClick: () => go('/projects/goals') },
+    { key: 'portfolio', label: 'Portfolio', icon: Briefcase, isActive: exactActive('/projects/portfolio'), onClick: () => go('/projects/portfolio') },
+    { key: 'tree', label: 'Project Tree', icon: Briefcase, isActive: exactActive('/projects/projects/tree'), onClick: () => go('/projects/projects/tree') },
+    { key: 'workload', label: 'Workload', icon: BarChart3, isActive: exactActive('/projects/workload'), onClick: () => go('/projects/workload') },
+  ]
+  if (entitlements.viewMoneyAnywhere) {
+    insights.push(
+      { key: 'margin', label: 'Margin Report', icon: TrendingUp, isActive: exactActive('/projects/margin'), onClick: () => go('/projects/margin') },
+      { key: 'batch-invoicing', label: 'Batch Invoicing', icon: ReceiptText, isActive: exactActive('/projects/batch-invoicing'), onClick: () => go('/projects/batch-invoicing') },
+    )
+  }
+  insights.push({ key: 'utilization', label: 'Utilization', icon: PieChart, isActive: exactActive('/projects/utilization'), onClick: () => go('/projects/utilization') })
+  out.push({ label: 'Insights', items: insights, collapsible: true })
+
+  const team = [
+    { key: 'people', label: 'People', icon: UsersRound, isActive: exactActive('/projects/people'), onClick: () => go('/projects/people') },
+    { key: 'teams', label: 'Teams', icon: Building2, isActive: exactActive('/projects/teams'), onClick: () => go('/projects/teams') },
+    ...store.pinnedTeams.map((t) => ({
+      key: `team-${t.team_key}`,
+      kind: 'team',
+      label: t.team_name,
+      team: t,
+      isActive: route.path.startsWith('/projects/team/' + t.team_key),
+    })),
+  ]
+  out.push({ label: 'Team', items: team, collapsible: true })
+
+  return out
+})
+
 // ── Notification badge ────────────────────────────────────────────────
 const unreadCount = computed(() => store.notificationCount || 0)
 const sessionUser = window?.frappe?.session?.user || ''
@@ -1007,7 +800,7 @@ const workspaceName = computed(
     entitlements.branding.brand_name ||
     window.frappe?.boot?.sysdefaults?.company ||
     window.frappe?.sitename?.split('.')[0] ||
-    'BatchProjects'
+    'Projects'
 )
 
 // ── User info (reactive — sourced from the store, not window.frappe) ─────
@@ -1070,7 +863,7 @@ function exactActive (path) {
   return route.path === path
 }
 function isProjectActive (key) {
-  return route.path.startsWith(`/workspace/${key}`)
+  return route.path.startsWith(`/projects/${key}`)
 }
 
 // ── Margin indicator ──────────────────────────────────────────────────
@@ -1091,16 +884,16 @@ function toggleProjectMenu (name) {
   projectMenuOpen.value = projectMenuOpen.value === name ? null : name
 }
 function goProject (p, section) {
-  go('/workspace/' + p.key + '/' + section)
+  go('/projects/' + p.key + '/' + section)
   projectMenuOpen.value = null
 }
 function copyProjectLink (p) {
-  const url = window.location.origin + '/workspace/' + p.key + '/board'
+  const url = window.location.origin + '/projects/' + p.key + '/board'
   navigator.clipboard?.writeText(url).catch(() => {})
   projectMenuOpen.value = null
 }
 function openProjectNewTab (p) {
-  window.open('/workspace/' + p.key + '/board', '_blank')
+  window.open('/projects/' + p.key + '/board', '_blank')
   projectMenuOpen.value = null
 }
 function onDocProjectMenu (e) {
@@ -1112,7 +905,7 @@ function toggleTeamMenu (key) {
   teamMenuOpen.value = teamMenuOpen.value === key ? null : key
 }
 function goTeam (key, section) {
-  go('/workspace/team/' + key + (section ? '/' + section : ''))
+  go('/projects/team/' + key + (section ? '/' + section : ''))
   teamMenuOpen.value = null
 }
 function onDocTeamMenu (e) {
@@ -1180,45 +973,6 @@ onUnmounted(() => {
 
 // ── Sub-components ────────────────────────────────────────────────────
 
-const NavItem = defineComponent({
-  props: ['active'],
-  emits: ['click'],
-  setup (props, { slots, emit }) {
-    return () =>
-      h(
-        'button',
-        {
-          onClick: () => emit('click'),
-          class: [
-            'w-full flex items-center gap-2.5 rounded-md cursor-pointer transition-colors h-[33px] pl-2.5 pr-2 mb-px text-left',
-            props.active
-              ? 'bg-[var(--sidebar-active-bg)] text-white font-semibold'
-              : 'text-[var(--sidebar-text)] font-medium hover:bg-white/[0.06] hover:text-white'
-          ].join(' ')
-        },
-        [
-          h(
-            'span',
-            {
-              class: [
-                'shrink-0 flex items-center',
-                props.active ? 'text-white' : 'text-[var(--sidebar-text)]'
-              ].join(' ')
-            },
-            slots.icon?.()
-          ),
-          h(
-            'span',
-            {
-              class: 'flex-1 flex items-center gap-1.5 text-base truncate'
-            },
-            slots.default?.()
-          )
-        ]
-      )
-  }
-})
-
 const MobileTab = defineComponent({
   props: ['active'],
   emits: ['click'],
@@ -1284,10 +1038,10 @@ const MobileTab = defineComponent({
 }
 .sb-hdr-btn:hover {
   color: var(--sidebar-text-active);
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--sidebar-hover-bg);
 }
 
-/* HeroUI-style popover surface (floats above the dark sidebar) */
+/* HeroUI-style popover surface (floats above the sidebar) */
 .sb-pop {
   background: var(--overlay);
   border-radius: 11px;
@@ -1314,7 +1068,7 @@ const MobileTab = defineComponent({
 .sb-col-btn:active { transform: scale(0.92); }
 .sb-col-btn:hover {
   color: var(--sidebar-text-active);
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--sidebar-hover-bg);
 }
 .sb-col-btn.sb-col-active {
   color: var(--sidebar-text-active);
@@ -1346,10 +1100,10 @@ const MobileTab = defineComponent({
   font-size:var(--text-xs);
   font-weight: 700;
   flex-shrink: 0;
-  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  border: 1.5px solid var(--sidebar-bg);
 }
 
-/* Dropdown menu items — HeroUI menu rows (float above the dark sidebar) */
+/* Dropdown menu items — HeroUI menu rows floating above the sidebar */
 .sb-menu-item {
   display: flex;
   align-items: center;
@@ -1382,13 +1136,13 @@ const MobileTab = defineComponent({
 /* Scrollbar */
 .sb-scroll {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+  scrollbar-color: var(--border-secondary, #d5d5d5) transparent;
 }
 .sb-scroll::-webkit-scrollbar {
   width: 3px;
 }
 .sb-scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--border-secondary, #d5d5d5);
   border-radius: 3px;
 }
 

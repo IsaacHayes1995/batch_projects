@@ -1,0 +1,1 @@
+import{X as t,E as s,K as o,P as n}from"./vendor-Dc9fU95U.js";const r={},c={class:"px-2 pt-1.5 pb-1 text-xs font-semibold text-muted uppercase tracking-wider select-none"};function a(e,p){return s(),o("p",c,[n(e.$slots,"default")])}const d=t(r,[["render",a]]);export{d as D};

@@ -8,7 +8,7 @@ _manifest_cache = {}
 
 def get_spa_entry():
     """Resolve the SPA's actual (content-hashed) entry filenames from Vite's
-    build manifest, for the www/workspace.html and www/batch-projects.html
+    build manifest, for the www/projects.html and www/batch-projects.html
     templates.
 
     Previously the entry had a fixed name ("index.js") with a manually

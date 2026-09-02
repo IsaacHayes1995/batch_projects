@@ -151,7 +151,7 @@ export function useCreateProject({ onSuccess } = {}) {
         toast.success('Project created from template', {
           description: `${created.key} · ${form.value.name.trim()}`,
         })
-        router.push(`/workspace/${created.key}/board`)
+        router.push(`/projects/${created.key}/board`)
         onSuccess?.()
         return
       }
@@ -187,7 +187,7 @@ export function useCreateProject({ onSuccess } = {}) {
       toast.success('Project created', {
         description: `${form.value.key} · ${form.value.name.trim()}`,
       })
-      router.push(`/workspace/${form.value.key}/board`)
+      router.push(`/projects/${form.value.key}/board`)
       onSuccess?.()
     } catch (e) {
       console.error(e)

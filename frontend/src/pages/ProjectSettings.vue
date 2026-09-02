@@ -925,7 +925,7 @@
                 <h1 class="text-xl font-semibold text-foreground tracking-[-0.01em]">Custom fields</h1>
                 <p class="text-base text-muted mt-1">
                   Fields private to this project, or attached from the
-                  <RouterLink to="/workspace/settings/customFields" class="text-primary hover:underline">
+                  <RouterLink to="/projects/settings/customFields" class="text-primary hover:underline">
                     workspace library
                   </RouterLink>.
                 </p>
@@ -2303,7 +2303,7 @@ function showToast(message, type = 'success') {
 
 function goBack() {
   const key = route.params.key
-  router.push(key ? store.projectLanding(key) : '/workspace')
+  router.push(key ? store.projectLanding(key) : '/projects')
 }
 </script>
 

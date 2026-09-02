@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="Projects">
+  <defs>
+    <linearGradient id="projects-amber" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FBBF24"/>
+      <stop offset="1" stop-color="#EA8A04"/>
+    </linearGradient>
+  </defs>
+  <rect width="48" height="48" rx="11" fill="url(#projects-amber)"/>
+  <!-- Three task rows; the top one is checked. Stroke-only so the mark stays
+       legible when the icon is scaled down to 16px in the app switcher. -->
+  <g fill="none" stroke="#FFFFFF" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M13.5 17.75 L16.25 20.5 L21.5 15.25"/>
+    <path d="M26.5 18 H34.5"/>
+    <path d="M13.5 27 H34.5"/>
+    <path d="M13.5 34 H27.5"/>
+  </g>
+</svg>

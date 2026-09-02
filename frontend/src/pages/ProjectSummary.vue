@@ -77,7 +77,7 @@
           <span v-if="project.budget_amount" class="text-sm text-muted">
             <span class="text-muted mr-1">Budget:</span>{{ project.currency || 'USD' }} {{ Number(project.budget_amount).toLocaleString() }}
           </span>
-          <router-link :to="`/workspace/${projectKey}/settings/billing`" class="ml-auto text-sm text-muted hover:text-accent transition-colors">
+          <router-link :to="`/projects/${projectKey}/settings/billing`" class="ml-auto text-sm text-muted hover:text-accent transition-colors">
             Edit billing →
           </router-link>
         </div>
@@ -104,7 +104,7 @@
           <!-- Status overview -->
           <SectionCard
             title="Status overview"
-            :to="`/workspace/${projectKey}/board`"
+            :to="`/projects/${projectKey}/board`"
             view-all-label="View board →"
           >
             <!-- 3+ statuses: donut reads better than proportional bars -->
@@ -166,7 +166,7 @@
         <div v-if="totalIssues >= 3" class="grid grid-cols-2 gap-6">
 
           <!-- Epic progress -->
-          <SectionCard title="Epic progress" :to="`/workspace/${projectKey}/settings/epics`" view-all-label="View epics →">
+          <SectionCard title="Epic progress" :to="`/projects/${projectKey}/settings/epics`" view-all-label="View epics →">
             <div v-if="epics.length" class="space-y-3 overflow-y-auto pr-1" :style="{ height: WIDGET_H + 'px' }">
               <div v-for="e in epics" :key="e.name">
                 <div class="flex items-center justify-between text-xs mb-1">
@@ -267,7 +267,7 @@
         <SectionCard
           title="Needs attention"
           subtitle="Overdue, due soon, or high-priority tasks"
-          :to="`/workspace/${projectKey}/list`"
+          :to="`/projects/${projectKey}/list`"
           view-all-label="View all →"
         >
           <DataTable :columns="attentionColumns" :rows="attentionTasks">

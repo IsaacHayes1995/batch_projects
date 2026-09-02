@@ -2,6 +2,27 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import path from "path";
 import fs from "fs";
+import { lucideIcons } from "./node_modules/frappe-ui/vite/lucideIcons.js";
+
+// frappe-ui's components import their icons as `~icons/lucide/<name>` virtual
+// modules, which nothing resolves unless its Vite plugin is installed. We do
+// NOT use frappe-ui's top-level plugin: that also swaps in its own dev proxy
+// and build config, both of which this app defines very deliberately below.
+//
+// lucideIcons() returns the virtual-module resolver alongside unplugin-auto-
+// import and unplugin-vue-components resolvers, which would start
+// auto-importing components app-wide. Keep only the resolver, by name.
+const frappeUILucideIcons = lucideIcons()
+  .flat()
+  .filter((plugin) => plugin && plugin.name === "frappe-ui-lucide-icons");
+
+if (!frappeUILucideIcons.length) {
+  throw new Error(
+    "frappe-ui's lucide virtual-module plugin was not found — frappe-ui " +
+      "components will fail to resolve their icons. Check whether " +
+      "frappe-ui/vite/lucideIcons.js still exports it under that name.",
+  );
+}
 
 const FRAPPE_BACKEND = "https://test1-erp.batchprojects.com";
 // Local bp-gateway-dev stack (Caddy on 8080 → gateway:8001 → this same
@@ -37,7 +58,7 @@ function bpDevBillingMocksPlugin() {
         if (req.method !== "POST") return next();
         res.setHeader("Content-Type", "application/json");
         res.end(JSON.stringify({
-          checkout_url: "/workspace/pricing?checkout=mock-success",
+          checkout_url: "/projects/pricing?checkout=mock-success",
           session_id: "dev_mock_" + Date.now(),
         }));
       });
@@ -65,7 +86,7 @@ function bpDevBillingMocksPlugin() {
 }
 
 export default defineConfig(({ command }) => ({
-  plugins: [vue(), bpDevBillingMocksPlugin()],
+  plugins: [vue(), ...frappeUILucideIcons, bpDevBillingMocksPlugin()],
   base: command === "build" ? "/assets/batch_projects/frontend/" : "/",
   define: {
     // Expose backend URL for direct socket connection in dev
@@ -81,7 +102,7 @@ export default defineConfig(({ command }) => ({
     emptyOutDir: true,
     target: "es2015",
     // Entry is now content-hashed like every other chunk (see manifest.json,
-    // read server-side by workspace.py) instead of a fixed "index.js" with a
+    // read server-side by projects.py) instead of a fixed "index.js" with a
     // manually-appended ?v=<mtime>. That fixed-name + external-query scheme
     // is what caused the double-bootstrap bug documented below: Rollup's own
     // chunk-to-chunk imports always reference the entry by its bare output
@@ -104,16 +125,21 @@ export default defineConfig(({ command }) => ({
         // still folds *some* app-level code shared between App.vue and lazy
         // pages into the entry no matter how manualChunks is tuned (even a
         // single leaf component can trigger it). The real fix is below:
-        // build.manifest + workspace.py reading the actual hashed entry
+        // build.manifest + projects.py reading the actual hashed entry
         // filename, so every reference (HTML and Rollup's own internal
         // chunk-to-chunk imports) resolves to the identical URL.
         manualChunks(id) {
           if (id.includes("node_modules")) return "vendor";
         },
-        assetFileNames: (info) =>
-          info.name === "index.css"
-            ? "assets/index.css"
-            : "assets/[name]-[hash][extname]",
+        // The stylesheet is content-hashed like every other asset. It used to
+        // be pinned to a fixed "assets/index.css" while the JS entry was
+        // hashed, so a browser could hold a cached stylesheet against freshly
+        // deployed markup — and because Vue's scoped-CSS attribute (data-v-*)
+        // is recomputed whenever a component's contents change, stale CSS does
+        // not merely look dated, it stops matching at all: every scoped rule
+        // silently drops out. spa_assets.get_spa_entry() already reads the real
+        // filename out of Vite's manifest, so nothing needs a fixed name.
+        assetFileNames: "assets/[name]-[hash][extname]",
       },
     },
   },

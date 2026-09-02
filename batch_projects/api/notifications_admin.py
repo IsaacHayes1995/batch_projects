@@ -132,7 +132,7 @@ def preview_notification_template(event_key, subject="", body=""):
     from batch_projects.email_templates import build_custom_notification_email
     html = build_custom_notification_email(
         event_key, ctx.get("task_key", ""), rendered_body,
-        frappe.utils.get_url("/workspace/account"),
+        frappe.utils.get_url("/projects/account"),
     )
     return {"subject": rendered_subject, "html": html}
 

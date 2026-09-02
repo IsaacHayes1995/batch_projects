@@ -453,7 +453,7 @@ const tableReports = computed(() => {
   return [...src].sort((a, b) => String(b.modified || '').localeCompare(String(a.modified || '')))
 })
 
-function open(id) { router.push(`/workspace/reports/${id}`) }
+function open(id) { router.push(`/projects/reports/${id}`) }
 function toggleStar(r) { store.updateReport(r.id, { starred: !r.starred }) }
 function togglePin(r) { store.togglePinned(r.id) }
 
@@ -524,7 +524,7 @@ async function submitForm() {
     store.updateReport(id, { color: formColor.value })
     if (formTemplate.value?.build) formTemplate.value.build(id, store)
     formOpen.value = false
-    router.push(`/workspace/reports/${id}`)
+    router.push(`/projects/reports/${id}`)
   } catch (e) {
     if (e instanceof UpgradeRequiredError) {
       toast.error(e.message, { action: { label: 'Upgrade', onClick: () => router.push({ name: 'Pricing' }).catch(() => { window.location.hash = '#/pricing' }) } })
@@ -553,7 +553,7 @@ async function doImport() {
   try {
     const id = await store.importReport(def)
     importOpen.value = false
-    router.push(`/workspace/reports/${id}`)
+    router.push(`/projects/reports/${id}`)
   } catch (e) { importErr.value = e?.message || 'Import failed.' }
   finally { importing.value = false }
 }

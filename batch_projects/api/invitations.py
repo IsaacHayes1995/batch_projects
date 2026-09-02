@@ -29,7 +29,7 @@ def _normalize_email(email: str) -> str:
 
 
 def _accept_url(token: str) -> str:
-    return get_url(f"/workspace/invite/{token}")
+    return get_url(f"/projects/invite/{token}")
 
 
 def _is_member(project: str, user: str) -> bool:

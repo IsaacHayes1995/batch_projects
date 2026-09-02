@@ -22,7 +22,7 @@
 
         <div class="flex flex-col gap-0.5 min-w-0">
           <div class="flex items-center gap-1.5">
-            <button class="text-sm text-muted hover:text-foreground font-medium transition-colors" @click="router.push('/workspace')">Projects</button>
+            <button class="text-sm text-muted hover:text-foreground font-medium transition-colors" @click="router.push('/projects')">Projects</button>
             <ChevronRight :size="12" class="text-muted shrink-0" />
             <span class="text-xs text-muted font-medium truncate">{{ projectKey  }}</span>
           </div>
@@ -69,7 +69,7 @@
               leave-to-class="transform scale-95 opacity-0"
             >
               <div v-if="moreOpen" class="absolute top-[calc(100%+6px)] right-0 z-50 w-44 bg-overlay border border-border rounded-md shadow-lg p-1.5">
-                <button class="flex items-center gap-2.5 w-full px-2.5 py-1.5 text-sm font-medium text-foreground hover:bg-default rounded-md transition-colors" @click="router.push(`/workspace/${projectKey}/settings`); moreOpen=false">
+                <button class="flex items-center gap-2.5 w-full px-2.5 py-1.5 text-sm font-medium text-foreground hover:bg-default rounded-md transition-colors" @click="router.push(`/projects/${projectKey}/settings`); moreOpen=false">
                   <Settings :size="14" class="text-muted" /> Settings
                 </button>
                 <button class="flex items-center gap-2.5 w-full px-2.5 py-1.5 text-sm font-medium text-foreground hover:bg-default rounded-md transition-colors" @click="copyLink">
@@ -172,7 +172,7 @@
                 <template v-if="tab.locked" #endContent><Lock :size="11" class="text-muted" /></template>
               </DropdownItem>
               <DropdownSeparator />
-              <DropdownItem @click="router.push(`/workspace/${projectKey}/settings/views`)">
+              <DropdownItem @click="router.push(`/projects/${projectKey}/settings/views`)">
                 <template #startContent><Settings :size="14" class="text-muted" /></template>
                 Rearrange views…
               </DropdownItem>
@@ -462,7 +462,7 @@ const tabs = computed(() => {
   return out
 })
 const isActiveTab = (tab) => route.path.includes(`/${tab.value}`)
-const navigate    = (tab) => router.push(`/workspace/${projectKey.value}/${tab.value}`)
+const navigate    = (tab) => router.push(`/projects/${projectKey.value}/${tab.value}`)
 
 // Order is configured in Project Settings → Views. Unset (the common case —
 // nothing customized yet) means NO reordering: keep tabs.value's natural
@@ -615,7 +615,7 @@ async function archiveProject() {
   try {
     const { updateProjectGeneral } = await import('@/utils/api.js')
     await updateProjectGeneral(currentProject.value.name, { status: 'Archived' })
-    router.push('/workspace')
+    router.push('/projects')
   } catch (e) { console.error(e) }
 }
 

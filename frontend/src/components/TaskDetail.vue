@@ -686,7 +686,7 @@
             </DropdownItem>
             <p v-if="!store.teams.length" class="jv-dd-empty">No teams yet</p>
             <div class="jv-dd-sep"/>
-            <DropdownItem @click="router.push('/workspace/teams')">
+            <DropdownItem @click="router.push('/projects/teams')">
               <span style="color:var(--muted)">Manage teams…</span>
             </DropdownItem>
           </FieldDropdown>
@@ -1128,7 +1128,7 @@ const ent = useEntitlementsStore()
 
 function goToSettings(tab) {
   const key = store.currentProject?.key
-  if (key) router.push(`/workspace/${key}/settings/${tab}`)
+  if (key) router.push(`/projects/${key}/settings/${tab}`)
 }
 const issue = computed(() => store.selectedTask)
 const taskWord = computed(() => getTaskWord(store.currentProject?.template_used))

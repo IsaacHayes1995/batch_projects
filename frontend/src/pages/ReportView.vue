@@ -804,7 +804,7 @@ function onWidgetTextChange(widgetId, text) {
   reportsStore.updateWidgetConfig(reportId.value, widgetId, { text })
 }
 
-function goBack() { router.push('/workspace/reports/dashboard') }
+function goBack() { router.push('/projects/reports/dashboard') }
 
 const rootEl = ref(null)
 
@@ -865,7 +865,7 @@ function present() { rootEl.value?.requestFullscreen?.().catch(() => {}) }
 function printReport() { window.print() }
 async function duplicate() {
   const id = await reportsStore.duplicateReport(reportId.value)
-  if (id) router.push(`/workspace/reports/${id}`)
+  if (id) router.push(`/projects/reports/${id}`)
 }
 function exportTemplate() {
   const r = report.value
@@ -920,14 +920,14 @@ const deleting = ref(false)
 async function confirmDelete() {
   await reportsStore.deleteReport(reportId.value)
   deleting.value = false
-  router.replace('/workspace/reports/dashboard')
+  router.replace('/projects/reports/dashboard')
 }
 
 async function init() {
   initializing.value = true
   await reportsStore.load()
   await reportsStore.ensureReport(reportId.value)
-  if (!report.value) { router.replace('/workspace/reports/dashboard'); return }
+  if (!report.value) { router.replace('/projects/reports/dashboard'); return }
   if (!store.projects.length) { try { await store.fetchProjects() } catch {} }
   // Pre-seed loading state so widgets render a skeleton immediately, not "No data".
   for (const w of widgets.value) {
