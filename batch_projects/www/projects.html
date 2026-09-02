@@ -18,6 +18,7 @@
         window.frappe = window.frappe || {};
         window.frappe.csrf_token = "{{ csrf_token }}";
         window.frappe.session = { user: "{{ frappe.session.user }}", user_fullname: "{{ user_fullname }}" };
+        window.frappe.sitename = "{{ sitename }}";
         window["__BP_BRIDGE_URL__"] = "{{ bp_bridge_url }}";
 
         // Self-hosted Excalidraw fonts (frontend/public/fonts/ -> this app's

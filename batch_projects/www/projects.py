@@ -7,6 +7,10 @@ base_template_path = ""
 
 def get_context(context):
     context.csrf_token = frappe.sessions.get_csrf_token()
+    # The sidebar header shows the site as the organisation, above the app
+    # name — the Desk header is laid out the same way. Passed through the
+    # context because Frappe's Jinja sandbox does not expose frappe.local.
+    context.sitename = frappe.local.site
     context.user_fullname = frappe.utils.get_fullname(frappe.session.user)
     context.no_breadcrumbs = True
     context.no_header = True
